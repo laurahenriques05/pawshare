@@ -51,6 +51,14 @@ describe('initial migration on PostgreSQL with authenticated RLS roles', () => {
   expect((await sql.query("update public.dogs set name='Updated' returning id")).rows).toHaveLength(1)
   expect((await sql.query("update public.households set name='Hijacked' returning id")).rows).toHaveLength(0)
  })
+ it('lets the owner rename the household and shares the saved name with members', async () => {
+  await asUser(a)
+  const result=await sql.query<{name:string}>("update public.households set name='Our little pack' where id=$1 returning name",[household])
+  expect(result.rows[0].name).toBe('Our little pack')
+  await asUser(b)
+  expect((await sql.query<{name:string}>('select name from public.households where id=$1',[household])).rows[0].name).toBe('Our little pack')
+  expect((await sql.query("update public.households set name='Not permitted' where id=$1 returning id",[household])).rows).toHaveLength(0)
+ })
  it('revokes access immediately after membership removal', async () => {
   await sql.exec(`reset role; delete from public.household_members where user_id='${b}'`)
   await asUser(b); expect(await count('dogs')).toBe(0)

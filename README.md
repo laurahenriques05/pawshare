@@ -140,3 +140,7 @@ Owners see invitation status and may revoke pending links. Members see family di
 Security: 240+ bits of random token entropy, SHA-256 digests at rest, owner-only issuance/revocation, confirmed email checked in `auth.users`, RLS on invitations, explicit function grants, row locking for atomic acceptance, idempotent retries, and fixed member role. Raw tokens are returned only once when creating links. Invitation routes have noindex/nofollow and the app uses a no-referrer policy.
 
 Manual integration checks: invite an existing user, invite a new user, test an incorrect email account, confirm a new account, accept twice, revoke a link before use, generate a replacement, and verify both members see the same dog/photo. Verify the member has no invite or revoke controls and cannot use those RPCs directly.
+
+## Rename a family
+
+Owners can open More → Family, edit Family name, and select Save family name. The saved name updates the active header, Home privacy text, More card, family page and household selector immediately. Other members see the stored name when they next load the household. Names are trimmed and must contain 1–80 characters. Existing invitations remain valid and display the current name. Members cannot rename the family; the original owner-only household UPDATE policy enforces this on the server. No additional migration or configuration is needed.

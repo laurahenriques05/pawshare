@@ -4,7 +4,7 @@ import type { Dog, Household, Member } from '../../lib/supabase/database.types'
 import { useAuth } from '../auth/AuthProvider'
 type Data = { households: Household[]; household: Household | null; dog: Dog | null; membership: Member | null; loading: boolean; error: string | null }
 const empty: Data = { households: [], household: null, dog: null, membership: null, loading: true, error: null }
-const Context = createContext<Data & { reload: () => Promise<void>; select: (id: string) => void }>({ ...empty, reload: async () => {}, select: () => {} })
+const Context = createContext<Data & { reload: () => Promise<void>; select: (id: string) => void; updateHousehold: (household: Household) => void }>({ ...empty, reload: async () => {}, select: () => {}, updateHousehold: () => {} })
 export function HouseholdProvider({ children }: { children: ReactNode }) {
  const { session } = useAuth(); const userId = session?.user.id
  const storageKey = `pawshare.household.${userId || 'signed-out'}`
@@ -30,6 +30,9 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
    if (request === requestVersion.current) setData({ households, household, dog, membership, loading: false, error: null })
   } catch (error) { if (request === requestVersion.current) setData({ ...empty, loading: false, error: (error as Error).message }) }
  }, [userId, selected])
+ function updateHousehold(household: Household) {
+  setData(previous => ({ ...previous, households: previous.households.map(item => item.id === household.id ? household : item), household: previous.household?.id === household.id ? household : previous.household }))
+ }
  function select(id: string) {
   try { localStorage.setItem(storageKey, id) } catch { /* Switching still works without persistence. */ }
   if (id === selected) { void reload(); return }
@@ -38,6 +41,6 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
   setSelected(id)
  }
  useEffect(() => { void reload(); return () => { requestVersion.current += 1 } }, [reload])
- return <Context.Provider value={{ ...data, reload, select }}>{children}</Context.Provider>
+ return <Context.Provider value={{ ...data, reload, select, updateHousehold }}>{children}</Context.Provider>
 }
 export const useHousehold = () => useContext(Context)

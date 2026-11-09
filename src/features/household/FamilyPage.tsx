@@ -5,9 +5,10 @@ import { appUrl, db } from '../../lib/supabase/client'
 import type { FamilyMember, Invitation } from '../../lib/supabase/database.types'
 import { useAuth } from '../auth/AuthProvider'
 import { useHousehold } from './HouseholdProvider'
+import { FamilyNameForm } from './FamilyNameForm'
 
 export function FamilyPage() {
- const { household, membership } = useHousehold()
+ const { household, membership, updateHousehold } = useHousehold()
  const { session } = useAuth()
  const owner = membership?.role === 'owner'
  const [members, setMembers] = useState<FamilyMember[]>([])
@@ -60,6 +61,7 @@ export function FamilyPage() {
  }
  return <><PageTitle eyebrow="YOUR FAMILY" title={household!.name}>One dog. A little team of people who care.</PageTitle>
   {error && <Notice error>{error}</Notice>}{message && <Notice>{message}</Notice>}
+  {owner && <FamilyNameForm key={household!.id} household={household!} onSaved={updateHousehold}/>}
   <div className="family-grid"><section className="card"><div className="icon-tile"><Users/></div><h2>Your pack</h2>
    {loading ? <p role="status" className="muted">Loading family…</p> : <ul className="member-list">{members.map(member => <li key={member.user_id}><span className="avatar">{member.display_name.charAt(0).toUpperCase()}</span><div><strong>{member.display_name}{member.user_id === session?.user.id ? ' (you)' : ''}</strong><small>Joined {new Date(member.joined_at).toLocaleDateString()}</small></div><span className="role-badge">{member.role}</span></li>)}</ul>}
    {error && <Button type="button" className="secondary" onClick={() => void load()}>Retry loading family</Button>}
