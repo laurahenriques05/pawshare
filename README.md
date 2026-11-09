@@ -148,3 +148,5 @@ Owners can open More → Family and tap the small pencil beside the family name.
 ## Home design polish
 
 Home now presents a compact private dog portrait beside the dog’s name, a real household-member summary, an owner-only Invite someone shortcut, and the dog's saved details. The family summary uses the existing authorized roster RPC, with loading, empty, error and retry states. Owners and members see the appropriate family action. Missing profile fields are labeled clearly. No care logs or statistics are invented. The responsive layout was visually checked at desktop and 390px mobile widths using local preview fixtures; screenshots are design previews with sample content, not live account data. No new database migration is needed.
+
+Home also contains five explicitly labeled Coming soon previews: Feeding, Walks, Academy, Family tasks, and Lost Dog. They describe future highlights without simulated data, progress, or inactive action buttons. Each preview can be replaced independently by its live feature summary. Existing family membership and invitations remain available in the real family card.
