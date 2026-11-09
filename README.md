@@ -144,3 +144,7 @@ Manual integration checks: invite an existing user, invite a new user, test an i
 ## Rename a family
 
 Owners can open More → Family and tap the small pencil beside the family name. A compact editor appears with Save and Cancel; Escape also cancels. The saved name updates the active header, Home privacy text, More card, family page and household selector immediately. Other members see the stored name when they next load the household. Names are trimmed and must contain 1–80 characters. Existing invitations remain valid and display the current name. Members cannot rename the family; the original owner-only household UPDATE policy enforces this on the server. No additional migration or configuration is needed.
+
+## Home design polish
+
+Home now presents a larger private dog portrait, a real household-member summary, an owner-only Invite someone shortcut, and the dog's saved details. The family summary uses the existing authorized roster RPC, with loading, empty, error and retry states. Owners and members see the appropriate family action. Missing profile fields are labeled clearly. No care logs or statistics are invented. The responsive layout was visually checked at desktop and 390px mobile widths using local preview fixtures; screenshots are design previews with sample content, not live account data. No new database migration is needed.

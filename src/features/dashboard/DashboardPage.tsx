@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowUpRight, PawPrint, ShieldCheck, Sprout, Heart, Users } from 'lucide-react'
+import { ArrowUpRight, PawPrint, ShieldCheck, Users } from 'lucide-react'
 import { PageTitle, Button, Notice } from '../../components/ui'
 import { useHousehold } from '../household/HouseholdProvider'
 import { useAuth } from '../auth/AuthProvider'
@@ -7,9 +7,12 @@ import { DogForm } from '../dog-profile/DogForm'
 import { DogPhoto } from '../dog-profile/DogPhoto'
 import { db } from '../../lib/supabase/client'
 import { useState } from 'react'
+import { HomeView } from './HomeView'
+import { HomeFamilyCard } from './HomeFamilyCard'
 export function DashboardPage() {
- const { dog, household } = useHousehold()
- return <><PageTitle eyebrow="YOUR LITTLE CORNER OF DOG LIFE" title="Welcome home.">A happy place for {dog!.name} and the people who care.</PageTitle><section className="welcome-card"><div><span className="pill">YOUR PACK, ALL CONNECTED</span><h2>Big love.<br/>Little everyday moments.</h2><p>Your family’s space is ready.<br/>Let’s make good care a shared habit.</p><Link className="button light" to="/more/dog">Meet {dog!.name}<ArrowUpRight size={18}/></Link></div><div className="dog-emblem" aria-hidden="true"><PawPrint/><span>made for your pack</span></div></section><div className="section-heading"><h2>A lovely place to start</h2><span>One step at a time</span></div><div className="dashboard-grid"><section className="card dog-summary"><div className="dog-summary-heading"><DogPhoto householdId={household!.id} dogId={dog!.id} name={dog!.name}/><div><p className="eyebrow">THE HEART OF YOUR HOUSEHOLD</p><h2>{dog!.name}</h2><p className="muted">{dog!.breed || 'One of a kind'} · {dog!.activity_level} activity</p></div></div><dl><div><dt>Weight</dt><dd>{dog!.weight_kg ? `${dog!.weight_kg} kg` : 'Not added'}</dd></div><div><dt>Sex</dt><dd>{dog!.sex === 'unknown' ? 'Not specified' : dog!.sex}</dd></div></dl><Link className="text-link" to="/more/dog">View dog profile <ArrowUpRight size={16}/></Link></section><section className="card"><div className="icon-tile peach"><Heart/></div><h3>You’re right at the beginning.</h3><p className="muted">No care activity yet. Your shared story will grow here as PawShare’s next features arrive.</p><div className="empty-activity"><Sprout size={30}/><p>Good things start small.</p></div></section></div><div className="privacy-strip"><ShieldCheck size={20}/><p><strong>A space that’s yours.</strong> {household!.name} is private. You can use PawShare on your own.</p></div></>
+ const { dog, household, membership } = useHousehold()
+ const { session } = useAuth()
+ return <HomeView dog={dog!} household={household!} photo={<DogPhoto householdId={household!.id} dogId={dog!.id} name={dog!.name} className="home-portrait"/>} family={<HomeFamilyCard householdId={household!.id} currentUserId={session!.user.id} owner={membership?.role === 'owner'} dogName={dog!.name}/>}/>
 }
 export function DogProfilePage() { const { dog, household, reload } = useHousehold(); return <><PageTitle eyebrow="YOUR DOG" title={`${dog!.name}’s profile`}>The little details that make them, them.</PageTitle><section className="card max-w-2xl"><DogForm dog={dog} householdId={household!.id} onSaved={reload}/></section></> }
 export function MorePage() {

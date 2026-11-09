@@ -22,10 +22,10 @@ function useDogPhoto(householdId: string, dogId: string, version = 0) {
  return url
 }
 
-export function DogPhoto({ householdId, dogId, name, version = 0 }: { householdId: string; dogId: string; name: string; version?: number }) {
+export function DogPhoto({ householdId, dogId, name, version = 0, className = '' }: { householdId: string; dogId: string; name: string; version?: number; className?: string }) {
  const url = useDogPhoto(householdId, dogId, version)
  const [failed, setFailed] = useState<string | null>(null)
- return <div className="dog-photo">{url && failed !== url ? <img src={url} alt={`${name}’s photo`} width={112} height={112} onError={() => setFailed(url)}/> : <PawPrint aria-label="No dog photo yet" size={34}/>}</div>
+ return <div className={`dog-photo ${className}`}>{url && failed !== url ? <img src={url} alt={`${name}’s photo`} width={112} height={112} onError={() => setFailed(url)}/> : <PawPrint aria-label="No dog photo yet" size={34}/>}</div>
 }
 
 export function DogPhotoUpload({ householdId, dogId, name, onUploadingChange }: { householdId: string; dogId: string; name: string; onUploadingChange: (busy: boolean) => void }) {
