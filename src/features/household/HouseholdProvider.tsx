@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { db } from '../../lib/supabase/client'
 import type { Dog, Household, Member } from '../../lib/supabase/database.types'
 import { useAuth } from '../auth/AuthProvider'
@@ -7,9 +7,12 @@ const empty: Data = { households: [], household: null, dog: null, membership: nu
 const Context = createContext<Data & { reload: () => Promise<void>; select: (id: string) => void }>({ ...empty, reload: async () => {}, select: () => {} })
 export function HouseholdProvider({ children }: { children: ReactNode }) {
  const { session } = useAuth(); const userId = session?.user.id
- const [selected, select] = useState<string>('')
+ const storageKey = `pawshare.household.${userId || 'signed-out'}`
+ const [selected, setSelected] = useState<string>(() => { try { return localStorage.getItem(storageKey) || '' } catch { return '' } })
+ const requestVersion = useRef(0)
  const [data, setData] = useState<Data>(empty)
  const reload = useCallback(async () => {
+  const request = ++requestVersion.current
   if (!userId) { setData({ ...empty, loading: false }); return }
   setData(previous => ({ ...previous, loading: true, error: null }))
   try {
@@ -24,10 +27,17 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
     if (dogs.error) throw dogs.error; if (members.error) throw members.error
     dog = dogs.data; membership = members.data
    }
-   setData({ households, household, dog, membership, loading: false, error: null })
-  } catch (error) { setData({ ...empty, loading: false, error: (error as Error).message }) }
+   if (request === requestVersion.current) setData({ households, household, dog, membership, loading: false, error: null })
+  } catch (error) { if (request === requestVersion.current) setData({ ...empty, loading: false, error: (error as Error).message }) }
  }, [userId, selected])
- useEffect(() => { void reload() }, [reload])
+ function select(id: string) {
+  try { localStorage.setItem(storageKey, id) } catch { /* Switching still works without persistence. */ }
+  if (id === selected) { void reload(); return }
+  requestVersion.current += 1
+  setData(previous => ({ ...previous, loading: true }))
+  setSelected(id)
+ }
+ useEffect(() => { void reload(); return () => { requestVersion.current += 1 } }, [reload])
  return <Context.Provider value={{ ...data, reload, select }}>{children}</Context.Provider>
 }
 export const useHousehold = () => useContext(Context)
