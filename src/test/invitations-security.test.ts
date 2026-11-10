@@ -17,6 +17,7 @@ beforeAll(async()=>{
  await sql.exec(readFileSync('supabase/migrations/202611070001_initial_schema.sql','utf8'))
  await sql.exec(readFileSync('supabase/migrations/202611090002_family_invitations.sql','utf8'))
  await sql.exec(readFileSync('supabase/migrations/20261110155615_member_invitation_codes.sql','utf8'))
+ await sql.exec(readFileSync('supabase/migrations/20261110160557_leave_household.sql','utf8'))
  await sql.exec(`insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data) values
  ('${owner}','owner@example.test',now(),'{"display_name":"Owner"}'),
  ('${invitee}','invitee@example.test',now(),'{"display_name":"Invitee"}'),
@@ -125,5 +126,43 @@ describe('email-bound household invitation security',()=>{
   await expect(sql.query('select public.accept_household_invitation($1)',[token])).rejects.toThrow('permission denied')
   await expect(sql.query('select public.preview_household_invitation($1)',[token])).rejects.toThrow('permission denied')
   await expect(sql.query('select email from public.invitations')).rejects.toThrow('permission denied')
+ })
+})
+
+describe('leaving a household', () => {
+ it('denies outsiders and unauthenticated users', async () => {
+  await asUser(unverified)
+  await expect(sql.query('select public.leave_household($1)',[home])).rejects.toThrow('not a member')
+  await sql.exec('reset role;set role anon')
+  await expect(sql.query('select public.leave_household($1)',[home])).rejects.toThrow('permission denied')
+ })
+ it('blocks owners leaving without an eligible successor', async () => {
+  await asUser(owner)
+  await expect(sql.query('select public.leave_household($1)',[home])).rejects.toThrow('next owner')
+  await expect(sql.query('select public.leave_household($1,$2)',[home,unverified])).rejects.toThrow('next owner')
+  await expect(sql.query('select public.leave_household($1,$2)',[home,owner])).rejects.toThrow('next owner')
+ })
+ it('removes member access and prevents old invitation reuse', async () => {
+  await asUser(invitee)
+  await expect(sql.query('select public.leave_household($1,$2)',[home,outsider])).rejects.toThrow('Only the owner')
+  await sql.query('select public.leave_household($1)',[home])
+  expect((await sql.query('select id from public.dogs where household_id=$1',[home])).rows).toHaveLength(0)
+  expect((await sql.query('select id from public.households where id=$1',[ownHome])).rows).toHaveLength(1)
+  await expect(sql.query('select public.accept_household_invitation($1)',[token])).rejects.toThrow('unavailable or has expired')
+ })
+ it('allows a departed member to join again with a fresh code', async () => {
+  const fresh=await create('invitee@example.test')
+  await asUser(invitee)
+  await sql.query('select public.accept_household_invitation($1)',[fresh.token])
+  expect((await sql.query('select id from public.dogs where household_id=$1',[home])).rows).toHaveLength(1)
+ })
+ it('transfers ownership atomically while preserving the family and dog', async () => {
+  await asUser(owner)
+  await sql.query('select public.leave_household($1,$2)',[home,invitee])
+  expect((await sql.query('select id from public.households where id=$1',[home])).rows).toHaveLength(0)
+  await asUser(invitee)
+  expect((await sql.query<{role:string}>('select role from public.household_members where household_id=$1 and user_id=$2',[home,invitee])).rows[0].role).toBe('owner')
+  expect((await sql.query<{created_by:string}>('select created_by from public.households where id=$1',[home])).rows[0].created_by).toBe(invitee)
+  expect((await sql.query('select id from public.dogs where household_id=$1',[home])).rows).toHaveLength(1)
  })
 })

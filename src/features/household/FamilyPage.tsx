@@ -5,6 +5,8 @@ import { db } from '../../lib/supabase/client'
 import type { FamilyMember, Invitation } from '../../lib/supabase/database.types'
 import { useAuth } from '../auth/AuthProvider'
 import { useHousehold } from './HouseholdProvider'
+import { LeaveHouseholdForm } from './LeaveHouseholdForm'
+import { JoinFamilyForm } from '../onboarding/JoinFamilyForm'
 import { FamilyNameForm } from './FamilyNameForm'
 
 export function FamilyPage() {
@@ -72,6 +74,6 @@ export function FamilyPage() {
    const status = invite.accepted_at ? 'Joined' : invite.revoked_at ? 'Revoked' : new Date(invite.expires_at).getTime() <= Date.now() ? 'Expired' : 'Pending'
    return <li key={invite.id}><div><strong>{invite.email}</strong><small>{status} · {status === 'Pending' ? 'Expires' : 'Created'} {new Date(status === 'Pending' ? invite.expires_at : invite.created_at).toLocaleDateString()}</small></div>{status === 'Pending' && <Button type="button" className="secondary" disabled={busy} onClick={() => void revoke(invite.id)}>Revoke</Button>}</li>
   })}</ul>}</section>}
-  <div className="privacy-strip"><ShieldCheck size={20}/><p>Invitations grant member access only. Your family’s data stays private.</p></div>
+  <JoinFamilyForm/><LeaveHouseholdForm key={household!.id} members={members}/><div className="privacy-strip"><ShieldCheck size={20}/><p>Invitations grant member access only. Your family’s data stays private.</p></div>
  </>
 }

@@ -14,6 +14,7 @@ export type Database = { public: { Tables: {
  invitations: Table<Invitation & { token_hash: string }, never>;
  dogs: Table<Dog, Omit<Dog,'id'|'created_at'>>;
 }; Views: { [_ in never]: never }; Functions: {
+ leave_household: { Args: { p_household: string; p_new_owner?: string | null }; Returns: undefined };
  create_household_invitation: { Args: { p_household: string; p_email: string }; Returns: { id: string; token: string; expires_at: string } };
  preview_household_invitation: { Args: { p_token: string }; Returns: InvitationPreview };
  accept_household_invitation: { Args: { p_token: string }; Returns: string };
