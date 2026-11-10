@@ -8,3 +8,15 @@ export function pendingInvitation(search = ''): string | null {
 export function rememberInvitation(token: string) { if (validInvitationToken(token)) { try { localStorage.setItem(key, token) } catch { /* URL still carries the token. */ } } }
 export function forgetInvitation() { try { localStorage.removeItem(key) } catch { /* Storage may be disabled. */ } }
 export function invitationDestination(search = '') { const token = pendingInvitation(search); return token ? `/invite/${token}` : '/' }
+
+/** Extract an invitation token only; never navigate to a pasted website. */
+export function parseInvitationInput(input: string): string | null {
+ const value = input.trim()
+ if (validInvitationToken(value)) return value
+ try {
+  const url = new URL(value)
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
+  const match = /^\/invite\/([a-f0-9]{64})\/?$/.exec(url.pathname)
+  return match?.[1] ?? null
+ } catch { return null }
+}
