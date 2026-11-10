@@ -15,15 +15,17 @@ npm ci
 cp .env.example .env.local
 ```
 
-Fill `.env.local`:
+The checked-in `.env.example` already contains the shared project's verified public browser settings. After copying it, check the connection:
 
-```dotenv
-VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
-VITE_APP_URL=http://localhost:5173
+```bash
+npm run check:config
 ```
 
-The first two values are in the Supabase project's Connect/API configuration. Use the publishable key (or legacy anon key), never a service-role/secret key. All VITE_ variables are visible in the browser. Do not commit `.env.local`.
+Expect **Connection OK**. Restart `npm run dev` after changing `.env.local`; Vite reads these values at startup. If the checker succeeds but the browser still reports Invalid API key, stop the old dev server with Control+C and start it again. Check that the browser is opening the port printed by that server.
+
+These settings use a publishable key, which is safe to include in a browser app. Never substitute a secret or service-role key. Do not commit `.env.local`. For a different Supabase project, replace the URL and publishable key together.
+
+**Teammates joining the existing shared project should stop here and run `npm run dev`. The database migrations below are only for provisioning a new database. Do not reapply them to our shared project.**
 
 In Supabase SQL Editor, run the complete contents of `supabase/migrations/202611070001_initial_schema.sql` once. It creates the schema, profile trigger, transactional household RPC, grants, and RLS policies. No feature seed data is needed in this milestone. Alternatively, use the CLI after linking your project:
 
