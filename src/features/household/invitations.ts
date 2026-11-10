@@ -1,5 +1,5 @@
 const key = 'pawshare.pending-invitation'
-export function validInvitationToken(value: string | null | undefined): value is string { return typeof value === 'string' && /^[a-f0-9]{64}$/.test(value) }
+export function validInvitationToken(value: string | null | undefined): value is string { return typeof value === 'string' && /^(?:[a-f0-9]{32}|[a-f0-9]{64})$/.test(value) }
 export function pendingInvitation(search = ''): string | null {
  const explicit = new URLSearchParams(search).get('invite')
  if (validInvitationToken(explicit)) return explicit
@@ -12,11 +12,13 @@ export function invitationDestination(search = '') { const token = pendingInvita
 /** Extract an invitation token only; never navigate to a pasted website. */
 export function parseInvitationInput(input: string): string | null {
  const value = input.trim()
+ const code = value.replace(/[-\s]/g, '').toLowerCase()
+ if (validInvitationToken(code)) return code
  if (validInvitationToken(value)) return value
  try {
   const url = new URL(value)
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
-  const match = /^\/invite\/([a-f0-9]{64})\/?$/.exec(url.pathname)
+  const match = /^\/invite\/([a-f0-9]{32}|[a-f0-9]{64})\/?$/.exec(url.pathname)
   return match?.[1] ?? null
  } catch { return null }
 }

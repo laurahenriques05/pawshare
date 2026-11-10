@@ -16,6 +16,7 @@ beforeAll(async()=>{
  grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`)
  await sql.exec(readFileSync('supabase/migrations/202611070001_initial_schema.sql','utf8'))
  await sql.exec(readFileSync('supabase/migrations/202611090002_family_invitations.sql','utf8'))
+ await sql.exec(readFileSync('supabase/migrations/20261110155615_member_invitation_codes.sql','utf8'))
  await sql.exec(`insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data) values
  ('${owner}','owner@example.test',now(),'{"display_name":"Owner"}'),
  ('${invitee}','invitee@example.test',now(),'{"display_name":"Invitee"}'),
@@ -32,7 +33,7 @@ afterAll(async()=>{await sql.close()})
 describe('email-bound household invitation security',()=>{
  it('creates a normalized email invitation with a high-entropy token',async()=>{
   const created=await create('  INVITEE@example.test  ');token=created.token;inviteId=created.id
-  expect(token).toMatch(/^[a-f0-9]{64}$/)
+  expect(token).toMatch(/^[a-f0-9]{32}$/)
   const rows=await sql.query<{email:string}>('select email from public.invitations')
   expect(rows.rows[0].email).toBe('invitee@example.test')
  })
@@ -76,15 +77,18 @@ describe('email-bound household invitation security',()=>{
   expect(members.map(m=>m.display_name)).toEqual(['Owner','Invitee'])
   expect((await sql.query('select email from public.invitations')).rows).toHaveLength(0)
  })
- it('prevents member-created invitations and invitation revocation',async()=>{
-  await expect(sql.query('select public.create_household_invitation($1,$2)',[home,'another@example.test'])).rejects.toThrow('Only the household owner')
-  await expect(sql.query('select public.revoke_household_invitation($1)',[inviteId])).rejects.toThrow('Only the household owner')
+ it('allows member-created codes but protects other members’ invitations',async()=>{
+  const created=(await sql.query<{value:{id:string;token:string}}>('select public.create_household_invitation($1,$2) value',[home,'another@example.test'])).rows[0].value
+  expect(created.token).toMatch(/^[a-f0-9]{32}$/)
+  expect((await sql.query('select email from public.invitations')).rows).toHaveLength(1)
+  await sql.query('select public.revoke_household_invitation($1)',[created.id])
+  await expect(sql.query('select public.revoke_household_invitation($1)',[inviteId])).rejects.toThrow('Only the invitation creator or household owner')
   await expect(sql.query('insert into public.invitations(household_id,email,token_hash,created_by) values($1,$2,$3,$4)',[home,'bad@example.test','bad',invitee])).rejects.toThrow('permission denied')
  })
  it('denies outsider roster reads and owner-only mutations',async()=>{
   await asUser(outsider)
   await expect(sql.query('select * from public.get_household_members($1)',[home])).rejects.toThrow('access denied')
-  await expect(sql.query('select public.create_household_invitation($1,$2)',[home,'bad@example.test'])).rejects.toThrow('Only the household owner')
+  await expect(sql.query('select public.create_household_invitation($1,$2)',[home,'bad@example.test'])).rejects.toThrow('Only family members')
  })
  it('revokes an unused invitation without granting access',async()=>{
   const created=await create('outsider@example.test')

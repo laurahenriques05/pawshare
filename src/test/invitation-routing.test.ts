@@ -24,3 +24,8 @@ describe('pasted invitations', () => {
   expect(parseInvitationInput(`https://example.com/invite/${token}/extra`)).toBeNull()
  })
 })
+
+it('accepts grouped invitation codes regardless of case', () => {
+ expect(parseInvitationInput('ABCDEF12-34567890-ABCDEF12-34567890')).toBe('abcdef1234567890abcdef1234567890')
+ expect(parseInvitationInput('abcdef12 34567890 abcdef12 34567890')).toBe('abcdef1234567890abcdef1234567890')
+})
