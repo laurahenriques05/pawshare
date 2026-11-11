@@ -121,3 +121,60 @@ The handwritten TypeScript database types include application contracts. If gene
 ## Releases
 
 The production application is hosted by Vercel, with SPA rewrites in `vercel.json`. Set the public configuration at build time. The target workflow is **branch → push → pull request → another member's review → passing checks → merge to main → deploy that main commit**. Earlier direct releases are historical exceptions, not the future workflow. Do not claim GitHub/main/production are aligned until their actual commit IDs have been verified. See [release steps](docs/collaboration.md).
+
+The basic provider can select among existing memberships, but additional household creation/invitations are deliberately outside this milestone. Initial contracts are hand-maintained until connected schema generation is available.
+
+## Hosting later
+
+Deploy `dist/` after `npm run build`, with an SPA fallback to `index.html` for all non-file routes. Set the three public environment variables at build time and add the deployed callback/reset URLs in Supabase. `public/_redirects` supports compatible static hosts; `vercel.json` supports Vercel. Hosting is not provisioned by this milestone.
+
+## Dog profile photos
+
+Apply `supabase/migrations/202611090001_dog_photos.sql` after the initial schema. It creates a **private** `dog-photos` Storage bucket and household-restricted policies. Never make the bucket public. No additional environment variables are needed.
+
+In More → Dog profile, choose **Upload or change photo**. JPG, PNG, and WebP inputs up to 10 MB are accepted. The browser downsizes and re-encodes the image to JPEG, removing embedded location metadata. Photos save immediately; other profile fields still use Save changes. The photo appears beside the dog's name on Home and remains after reload. Existing households need no data backfill; dogs without photos show a paw icon.
+
+Images use a deterministic `<household-id>/<dog-id>.jpg` path, so no schema column or permanent public URL is required. Reads use five-minute signed URLs renewed while mounted. Members cannot read, upload, or replace another household's images.
+
+Manual checks after applying the migration: upload an image, return Home, reload, replace it, cancel the picker, try a file over 10 MB, and confirm another account cannot access the object. Embedded PostgreSQL tests exercise the storage policies against a minimal Storage schema; live Storage upload/signing still requires verification against the connected project.
+
+## Family invitations
+
+Apply `supabase/migrations/202611090002_family_invitations.sql` after the existing migrations. The live project has this migration applied. No email delivery provider or new environment variables are needed for link-based invitations.
+
+**Owner:** More → Family → enter the recipient's email → Create invitation link → Copy link. Share it yourself by message or email. PawShare does not send invitation emails automatically. Links expire after seven days. Revoke an unused invitation from the list; generating a replacement for the same email invalidates the previous link.
+
+**Recipient:** open the link, sign in or register with the invited email, confirm your email if needed, then explicitly accept. New users join the existing household directly, without creating another household or dog. Existing users retain their households and can switch using the household selector at the top. The selection persists on that browser per user.
+
+Signup and confirmation keep a pending invitation in browser storage. If confirmation is opened on a different device/browser (or storage is disabled), reopen the original invitation link after confirming your email. There is no automatic acceptance, and a link cannot be used with a different or unverified account. Back to PawShare on the invitation page clears pending navigation.
+
+Owners see invitation status and may revoke pending links. Members see family display names and roles, but not the invitation list or other members' email addresses. Owner transfer, member removal, and automated invitation email delivery are outside this change.
+
+Security: 240+ bits of random token entropy, SHA-256 digests at rest, owner-only issuance/revocation, confirmed email checked in `auth.users`, RLS on invitations, explicit function grants, row locking for atomic acceptance, idempotent retries, and fixed member role. Raw tokens are returned only once when creating links. Invitation routes have noindex/nofollow and the app uses a no-referrer policy.
+
+Manual integration checks: invite an existing user, invite a new user, test an incorrect email account, confirm a new account, accept twice, revoke a link before use, generate a replacement, and verify both members see the same dog/photo. Verify the member has no invite or revoke controls and cannot use those RPCs directly.
+
+## Rename a family
+
+Owners can open More → Family and tap the small pencil beside the family name. A compact editor appears with Save and Cancel; Escape also cancels. The saved name updates the active header, Home privacy text, More card, family page and household selector immediately. Other members see the stored name when they next load the household. Names are trimmed and must contain 1–80 characters. Existing invitations remain valid and display the current name. Members cannot rename the family; the original owner-only household UPDATE policy enforces this on the server. No additional migration or configuration is needed.
+
+## Home design polish
+
+Home now presents a compact private dog portrait beside the dog’s name, a real household-member summary, an owner-only Invite someone shortcut, and the dog's saved details. The family summary uses the existing authorized roster RPC, with loading, empty, error and retry states. Owners and members see the appropriate family action. Missing profile fields are labeled clearly. No care logs or statistics are invented. The responsive layout was visually checked at desktop and 390px mobile widths using local preview fixtures; screenshots are design previews with sample content, not live account data. No new database migration is needed.
+
+Home also contains five explicitly labeled Coming soon previews: Feeding, Walks, Academy, Family tasks, and Lost Dog. They describe future highlights without simulated data, progress, or inactive action buttons. Each preview can be replaced independently by its live feature summary. Existing family membership and invitations remain available in the real family card.
+
+## Walks
+
+The Walks feature on `codex/walk-tracking` adds private GPS recording, history,
+calendar summaries, recorder-only corrections, reversible deletion, a Home summary
+and a confirmed NFC start link. Apply only the new
+`supabase/migrations/202611110001_walks.sql` migration to the existing project
+before using it. See [Walks setup and validation](docs/walks.md) for full rollout
+instructions and [phone GPS tests](docs/walks-gps-testing.md) for required real-device
+checks. No new browser keys or paid map service are needed.
+
+The route map currently shows the GPS path without street tiles. Stationary
+automatic ending is optional and works only with uninterrupted foreground GPS.
+Shared mobile notifications and Academy progress await the corresponding team
+interfaces. Background/screen-locked tracking has not been verified on phones.
