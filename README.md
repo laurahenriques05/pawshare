@@ -155,4 +155,4 @@ Home also contains five explicitly labeled Coming soon previews: Feeding, Walks,
 
 ## Laura’s Feeding branch
 
-The `feature/laura-feeding` branch adds the first working Feeding and food-stock flow at `/feed`. See [the Feeding handoff](docs/feeding-handoff.md) for its migration, security model, manual test steps, NFC setup, known limits, and proposed calendar/notification adapter. This branch does not apply its migration to shared Supabase or publish itself. Coordinate the migration with the group before trying the persisted flow. No additional environment variables or dependencies are needed.
+The `feature/laura-feeding` branch adds the first working Feeding and food-stock flow at `/feed`. See [the Feeding handoff](docs/feeding-handoff.md) for its migration, security model, manual test steps, NFC setup, known limits, and proposed calendar/notification adapter. Laura authorized the shared Feeding migration on 11 November 2026 and it is now applied. Do not reapply it to the shared project. No additional environment variables or dependencies are needed.

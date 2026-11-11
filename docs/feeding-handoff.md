@@ -1,6 +1,6 @@
 # Laura — Feeding and food stock
 
-Branch: `feature/laura-feeding`. This is source work for review, not a production deployment. Apply `20261111113735_feeding_and_stock.sql` only after coordinating the shared Supabase schema. No new environment variables or packages are required. Do not rerun older migrations already installed on the shared database.
+Branch: `feature/laura-feeding`. The `20261111113735_feeding_and_stock.sql` migration was applied to shared Supabase on 11 November 2026 after Laura authorized publication. Do not apply it a second time. No new environment variables or packages are required. Do not rerun older migrations already installed on the shared database.
 
 ## Implemented
 
@@ -66,4 +66,4 @@ No credentials in the tag. The route requires authentication and existing member
 
 This is the first working slice of Laura's assignment. Per-product routine quantities are explicit daily-use estimates rather than a meal-time scheduler. A meal currently has one product line; mixed meals should eventually group multiple products as one feeding event so they are not counted/warned as two meals. The current confirmation allows recording a second product intentionally. Multi-line meals, push integration, calendar persistence, physical NFC testing, and recovery of NFC intent across sign-in remain follow-up work. The ledger is paged in 500-record batches to avoid silent PostgREST truncation; a server snapshot/aggregate endpoint would improve large-history consistency and efficiency.
 
-Verification: the migration and authorization rules were executed in embedded PostgreSQL (PGlite), with pure calculation/adapter tests. Actual React product and meal forms were visually checked using labelled sample-data previews at desktop and 390px widths; this is not a hosted browser-to-Supabase onboarding test. Shared Supabase migration, production deployment, phone push, and physical tag verification have not been performed.
+Verification: the migration and authorization rules were executed in embedded PostgreSQL (PGlite), with pure calculation/adapter tests. Actual React product and meal forms were visually checked using labelled sample-data previews at desktop and 390px widths; this is not a hosted browser-to-Supabase onboarding test. A live Supabase transaction under the authenticated role verified purchases, idempotent retries, deductions, duplicate warnings, edits/removal, and outsider isolation; all test data was rolled back. Phone push and physical tag verification remain pending. See the chat deployment result for publication status.
