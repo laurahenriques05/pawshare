@@ -1,158 +1,123 @@
-# PawShare · Milestone 1
+# PawShare
 
-A private, mobile-first dog-care space. Real Supabase authentication and persistence; no mock accounts or simulated data.
+**Live website:** https://pawshare-laurahenriques05.vercel.app
 
-## Requirements
+**Repository:** https://github.com/laurahenriques05/pawshare
 
-Node.js 22.12+ and npm. A Supabase project. Docker is optional and only needed for the local Supabase stack.
+PawShare is a private, mobile-first dog-care application for a household sharing one dog. This university group project uses React 19, TypeScript, Vite, Tailwind CSS, Supabase Auth/Postgres/Storage, and Vercel.
 
-## Run with hosted Supabase
+## Team and responsibilities
 
-From this project directory:
+| Member | Feature ownership |
+| --- | --- |
+| Laura | Feeding, food stock, feeding NFC; proposed integration coordinator for shared files and migration ordering |
+| Carol | Walk tracking, GPS routes/statistics, walk NFC |
+| Beni | Health, medication, treatment/document/weight history, vet details, account settings |
+| Maria | Family tasks, shared calendar, notifications, Academy |
+
+Feature owners implement their own UI, rules, migrations and tests. Coordinate shared changes with Laura and the affected owner before editing them. Anyone must be able to explain the whole application. See [AGENTS.md](AGENTS.md) for agent instructions and [the collaboration guide](docs/collaboration.md) for releases. Teaching-staff approval for the non-Python stack must be confirmed by the team; this repository does not establish that approval.
+
+## Current functionality
+
+- Email/password registration, sign-in, sign-out, confirmation return and password recovery through Supabase Auth. Email delivery depends on the project's Auth/SMTP configuration.
+- Private household creation and one-dog onboarding, without needing invitations; dog profile editing and private photo upload displayed beside the dog's name on Home.
+- Family roster, owner-only discreet family rename, email-bound invitation codes created by household members, invitation acceptance, and household departure. An owner must select another existing member before leaving; a sole owner cannot currently leave. After leaving, onboarding offers creating a household or joining an existing family.
+- Feeding and stock: multiple dry/wet/treat products, opening stock, package purchases, stock forecasts and in-app restocking notices.
+- Saved daily meal routines with explicit Edit/Save/Cancel, meal times, mixed foods/quantities and notes; today's meal checklist and quick recording; Given, Partially eaten, Refused and Skipped outcomes.
+- Stock decreases by food served, including discarded portions, rather than food eaten. Own feeding corrections/removal, shared purchase/product editing, atomic writes, retry protection and audit history.
+- A duplicate regular-meal warning only when another meal is recorded too soon. Treats are separate. The threshold uses the shortest planned gap, an explicit override, or the meals/day fallback.
+- Feeding NFC URL and confirmed quick logging; optional in-app tag writing on compatible Android Chrome browsers.
+
+Walks, Academy, Health and family tasks/calendar are future features represented by Coming soon previews. Phone push delivery, GPS routes, walk NFC and persistent calendar integration are not implemented here. Lost Dog Mode has been removed from scope. Current shared Feeding data refreshes on manual refresh/window focus; the clock update does not provide cross-device live synchronisation.
+
+## Run locally with the shared database
+
+Install **Node.js 22.12+ (22.x recommended)** and npm. Clone the repository and open its folder:
 
 ```bash
+git clone https://github.com/laurahenriques05/pawshare.git
+cd pawshare
 npm ci
 cp .env.example .env.local
-```
-
-The checked-in `.env.example` already contains the shared project's verified public browser settings. After copying it, check the connection:
-
-```bash
 npm run check:config
-```
-
-Expect **Connection OK**. Restart `npm run dev` after changing `.env.local`; Vite reads these values at startup. If the checker succeeds but the browser still reports Invalid API key, stop the old dev server with Control+C and start it again. Check that the browser is opening the port printed by that server.
-
-These settings use a publishable key, which is safe to include in a browser app. Never substitute a secret or service-role key. Do not commit `.env.local`. For a different Supabase project, replace the URL and publishable key together.
-
-**Teammates joining the existing shared project should stop here and run `npm run dev`. The database migrations below are only for provisioning a new database. Do not reapply them to our shared project.**
-
-In Supabase SQL Editor, run the complete contents of `supabase/migrations/202611070001_initial_schema.sql` once. It creates the schema, profile trigger, transactional household RPC, grants, and RLS policies. No feature seed data is needed in this milestone. Alternatively, use the CLI after linking your project:
-
-```bash
-npx supabase init
-npx supabase login
-npx supabase link --project-ref YOUR_PROJECT_REF
-npx supabase db push
-```
-
-`supabase init` creates local CLI configuration; it does not create a hosted project. Commit its config when adopting the CLI workflow. Review migrations before pushing to a shared project.
-
-In Authentication settings:
-
-- Enable email/password and email confirmation.
-- Set Site URL to `http://localhost:5173`.
-- Add `http://localhost:5173/auth/callback` and `http://localhost:5173/reset-password` to allowed Redirect URLs.
-- Keep standard Supabase email templates using `{{ .ConfirmationURL }}`.
-- Configure custom SMTP for testing with arbitrary real users. The built-in sender is restricted.
-- Require a password of at least 8 characters. Stronger server password policies are supported; their errors display in the form.
-
-```bash
 npm run dev
 ```
 
-Open http://localhost:5173. Restart Vite after changing environment values. Without configuration the app displays setup instructions instead of fake data.
+Open the localhost address printed by Vite (normally http://localhost:5173). If you already have the repository, fetch/pull the reviewed branch rather than cloning again. Until the Feeding pull request is reviewed and merged, use `feature/laura-feeding` for that work; `main` is the intended release branch.
 
-## Optional local Supabase
+The checked-in example contains the shared project's public browser settings. Required configuration:
 
-With Docker running:
+| Variable | Value |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Shared Supabase project API URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Matching public publishable key; never a secret/service-role key |
+| `VITE_APP_URL` | `https://pawshare-laurahenriques05.vercel.app` for shared/live links |
 
-```bash
-npx supabase init
-npx supabase start
-npx supabase db reset
+`.env.local` is ignored by Git. Vite embeds `VITE_` values in the browser bundle: do not put secrets in them. Restart the dev server after changing configuration. `check:config` makes a read-only request to the configured service; it is separate from the offline automated tests. An Invalid API key error usually requires checking the matching URL/key and restarting the correct dev server.
+
+**Joining the shared project does not require running migrations. Do not reset or reapply migrations to the shared hosted database.** A developer needs a Supabase dashboard invitation only to administer the service, not to use PawShare.
+
+## Database setup for a new, separate project
+
+The source of truth is `supabase/migrations/`. Apply every migration once, in filename order, to a new project; the initial migration alone is insufficient. This includes profiles/households/dogs, private dog-photo storage, invitations and codes, leaving/ownership transfer, and all three Feeding migrations. See [the Feeding handoff](docs/feeding-handoff.md).
+
+Use the Supabase SQL Editor or adopt the CLI workflow after checking its current help. Local CLI config is not currently committed: create it with `supabase init` before using the local Docker stack. Never run a remote reset. Review pending migrations against the target before applying them. Database schema and application release changes must be coordinated.
+
+For the hosted application, configure Auth Site URL as the live website. Allow these redirects, plus local equivalents when developing:
+
+- `https://pawshare-laurahenriques05.vercel.app/auth/callback`
+- `https://pawshare-laurahenriques05.vercel.app/reset-password`
+- `http://localhost:5173/auth/callback`
+- `http://localhost:5173/reset-password`
+
+Enable email/password sign-in. If email confirmation is enabled, configure dependable SMTP before promising public registration; the default sender has restrictions. Keep standard confirmation-link templates. Never disable security settings as a workaround without explicit agreement. Record configuration changes without copying credentials into documentation.
+
+## Invitations and household membership
+
+In **More → Family**, enter the recipient's email, create an invitation code, and share it privately. Codes expire after seven days; replacing one for the same email invalidates the previous code. PawShare does not automatically email invitation codes. The recipient signs in with the invited email and uses **Join an existing family** on household onboarding to enter and accept the code. Email verification requirements still apply. Legacy `/invite/:token` routes remain supported.
+
+Join-another-family controls belong on onboarding after leaving the current family, not on the active family page. Owners transfer ownership to an existing member when leaving. Sole-owner departure/deletion and full account deletion remain unfinished; do not delete auth users directly to bypass ownership/history constraints.
+
+## Feeding and NFC
+
+See [Feeding details and manual checks](docs/feeding-handoff.md). NFC tags contain an HTTPS URL, never credentials:
+
+```text
+https://pawshare-laurahenriques05.vercel.app/feed?quick=1&household=<household UUID>
 ```
 
-Use the local API URL and anon key printed by the CLI in `.env.local`. Enable email confirmations in `supabase/config.toml` if testing that branch; local emails appear in the local mail inbox printed by `supabase start`. `db reset` replaces local database data. Do not run a remote reset.
+The person must sign in and belong to that household. Tapping opens the confirmation flow; it never records a meal just by opening a URL. If sign-in loses the quick-action intent, tap again after signing in.
 
-## Verification
+Compatible Android Chrome devices can write tags from PawShare. iPhone browsers cannot write NFC tags: use a trusted iPhone NFC-writing app once to store the URL. Everyday use opens PawShare directly without that writing app. Physical tags and device-specific behaviour still need testing. Walk tags are reserved for Carol's future implementation.
 
-```bash
-npm test
-npm run build
-npm run preview
-```
-
-Tests include dog validation and the actual migration executed in embedded PostgreSQL (PGlite), using a minimal auth schema and real authenticated/anonymous database roles. They cover idempotency, household isolation, forbidden writes, member permissions, and one-dog uniqueness. This does not replace a hosted Supabase/Auth integration test. If using local Supabase, additionally run:
+## Commands and verification
 
 ```bash
-npx supabase test db
+npm test                 # Isolated automated tests, including embedded PostgreSQL
+npm run typecheck        # TypeScript checks
+npm run build            # TypeScript + production bundle
+npm run preview          # Serve the local production build
 ```
 
-The pgTAP tests are under `supabase/tests/database`. The handwritten initial TypeScript database contract is in `src/lib/supabase/database.types.ts`; regenerate after applying schema changes:
+GitHub Actions runs install, tests and build on pushes/pull requests. On 11 November 2026, **93 tests across 11 files passed**, and the production build passed. Tests exercise validation, invitations, photo policies, household isolation, Feeding calculations, migrations, creator permissions, stock deductions and retries. This is not proof of hosted email delivery, every browser workflow, physical NFC or push delivery. See [verification evidence and limits](docs/verification.md).
 
-```bash
-npx supabase gen types typescript --linked > src/lib/supabase/database.types.ts
-```
+The handwritten TypeScript database types include application contracts. If generating Supabase types, generate to a temporary file and reconcile changes; do not blindly overwrite custom exported types.
 
-## Complete manual onboarding test
+## Manual smoke test
 
-1. Open `/sign-up`, enter your name, email, and a password of at least 8 characters.
-2. Submit. With email confirmation enabled, check your inbox and open the confirmation link. It returns to `/auth/callback`, then onboarding. If the link has expired, sign up again to request confirmation or use Supabase's resend tools.
-3. Enter a household name and valid IANA time zone (the browser suggests yours). Continue. This atomically creates the household and your owner membership.
-4. Refresh before adding a dog. The app resumes the dog step; it does not create another household.
-5. Enter your dog's name. Other details are optional. Save to reach the dashboard; no invitations are required.
-6. Confirm your own dog and household appear. More → Dog profile lets you edit details; save, refresh, and verify persistence.
-7. Sign out under More. A direct visit to `/` returns to sign-in. Sign in and verify the dashboard returns.
-8. In a separate private browser session register a second account and create a different household/dog. Neither account should see the other's data. Also run the database tests, which exercise direct access beyond route guards.
-9. Test a bad password, offline submission, invalid time zone, future birth date, and negative weight. Expect an actionable error without progress being fabricated.
-10. Use Forgot password, open the email reset link, choose a new password, sign out, and sign in with it.
-11. Check at 375px and desktop widths, keyboard-only navigation, visible focus states, and labeled inputs.
-
-## Implemented scope
-
-React 19, TypeScript, Vite, Tailwind 4; responsive shell and shared UI; email signup/login/confirmation return/password recovery; private household onboarding; one dog registration/editing; real dashboard/profile summary; role and account display; sign-out; error/loading/empty states; SQL migration, security tests, CI.
-
-Feed, Walks, and Academy are explicitly disabled navigation labels. No feeding, GPS, Academy, Lost Dog, invitations, tasks, photo uploads, goals, or medical calculations are implemented. No public deployment or Supabase project provisioning has been performed.
+1. Register/sign in on the deployed app; verify email confirmation and password recovery separately when enabled.
+2. Create a household and dog without inviting anyone. Reload; confirm persistence and no duplicate household.
+3. Edit the dog, upload/replace its photo, and verify Home. Try invalid input and an oversized image.
+4. Invite a second account by code, accept with the matching email, and verify both see the same dog. Wrong-email/revoked/expired invitations must fail.
+5. Add food, buy two packages, save a two-meal mixed-food routine and log a meal. Confirm checklist, history and stock served quantities after reload.
+6. Try a too-soon meal, a refused/partial/skipped result, own corrections, another member's forbidden correction, and another household's isolation.
+7. Test owner rename and departure with transfer in a disposable demo household. Verify joining another family is offered after leaving.
+8. Check mobile/desktop, keyboard navigation, visible focus, offline errors and retry. Use two devices to check the actual refresh behaviour.
 
 ## Architecture and security
 
-`src/features` owns auth, household, onboarding, dashboard, and dog profile. `src/components/ui` contains shared presentation. `src/app` owns routing and shell. `src/lib` owns client, types, and validation.
+`src/app` owns routes/shell; `src/features` owns domain workflows; `src/components/ui` holds shared UI; `src/lib` holds clients, types and validation. Supabase `auth.users` owns credentials; `profiles` stores display metadata. Application tables have household/user-scoped RLS, and privileged transactional operations enforce membership and ownership on the server. Dog photos use private Storage and short-lived signed URLs.
 
-Users are stored in Supabase `auth.users`; `profiles` holds private display metadata. All application tables have RLS. Household and member creation is available only through the transactional `create_household` RPC. It serializes per-user retries and resumes existing membership. Direct member insertion, role changes, deletions, and dog household reassignment are not granted to browsers. Dog creation requires an owner; legitimate members may edit dog details. Membership helpers use a private schema, fixed search path, and explicit execute grants. Account/ownership deletion is deferred until a safe owner-transfer flow exists.
+## Releases
 
-The basic provider can select among existing memberships, but additional household creation/invitations are deliberately outside this milestone. Initial contracts are hand-maintained until connected schema generation is available.
-
-## Hosting later
-
-Deploy `dist/` after `npm run build`, with an SPA fallback to `index.html` for all non-file routes. Set the three public environment variables at build time and add the deployed callback/reset URLs in Supabase. `public/_redirects` supports compatible static hosts; `vercel.json` supports Vercel. Hosting is not provisioned by this milestone.
-
-## Dog profile photos
-
-Apply `supabase/migrations/202611090001_dog_photos.sql` after the initial schema. It creates a **private** `dog-photos` Storage bucket and household-restricted policies. Never make the bucket public. No additional environment variables are needed.
-
-In More → Dog profile, choose **Upload or change photo**. JPG, PNG, and WebP inputs up to 10 MB are accepted. The browser downsizes and re-encodes the image to JPEG, removing embedded location metadata. Photos save immediately; other profile fields still use Save changes. The photo appears beside the dog's name on Home and remains after reload. Existing households need no data backfill; dogs without photos show a paw icon.
-
-Images use a deterministic `<household-id>/<dog-id>.jpg` path, so no schema column or permanent public URL is required. Reads use five-minute signed URLs renewed while mounted. Members cannot read, upload, or replace another household's images.
-
-Manual checks after applying the migration: upload an image, return Home, reload, replace it, cancel the picker, try a file over 10 MB, and confirm another account cannot access the object. Embedded PostgreSQL tests exercise the storage policies against a minimal Storage schema; live Storage upload/signing still requires verification against the connected project.
-
-## Family invitations
-
-Apply `supabase/migrations/202611090002_family_invitations.sql` after the existing migrations. The live project has this migration applied. No email delivery provider or new environment variables are needed for link-based invitations.
-
-**Owner:** More → Family → enter the recipient's email → Create invitation link → Copy link. Share it yourself by message or email. PawShare does not send invitation emails automatically. Links expire after seven days. Revoke an unused invitation from the list; generating a replacement for the same email invalidates the previous link.
-
-**Recipient:** open the link, sign in or register with the invited email, confirm your email if needed, then explicitly accept. New users join the existing household directly, without creating another household or dog. Existing users retain their households and can switch using the household selector at the top. The selection persists on that browser per user.
-
-Signup and confirmation keep a pending invitation in browser storage. If confirmation is opened on a different device/browser (or storage is disabled), reopen the original invitation link after confirming your email. There is no automatic acceptance, and a link cannot be used with a different or unverified account. Back to PawShare on the invitation page clears pending navigation.
-
-Owners see invitation status and may revoke pending links. Members see family display names and roles, but not the invitation list or other members' email addresses. Owner transfer, member removal, and automated invitation email delivery are outside this change.
-
-Security: 240+ bits of random token entropy, SHA-256 digests at rest, owner-only issuance/revocation, confirmed email checked in `auth.users`, RLS on invitations, explicit function grants, row locking for atomic acceptance, idempotent retries, and fixed member role. Raw tokens are returned only once when creating links. Invitation routes have noindex/nofollow and the app uses a no-referrer policy.
-
-Manual integration checks: invite an existing user, invite a new user, test an incorrect email account, confirm a new account, accept twice, revoke a link before use, generate a replacement, and verify both members see the same dog/photo. Verify the member has no invite or revoke controls and cannot use those RPCs directly.
-
-## Rename a family
-
-Owners can open More → Family and tap the small pencil beside the family name. A compact editor appears with Save and Cancel; Escape also cancels. The saved name updates the active header, Home privacy text, More card, family page and household selector immediately. Other members see the stored name when they next load the household. Names are trimmed and must contain 1–80 characters. Existing invitations remain valid and display the current name. Members cannot rename the family; the original owner-only household UPDATE policy enforces this on the server. No additional migration or configuration is needed.
-
-## Home design polish
-
-Home now presents a compact private dog portrait beside the dog’s name, a real household-member summary, an owner-only Invite someone shortcut, and the dog's saved details. The family summary uses the existing authorized roster RPC, with loading, empty, error and retry states. Owners and members see the appropriate family action. Missing profile fields are labeled clearly. No care logs or statistics are invented. The responsive layout was visually checked at desktop and 390px mobile widths using local preview fixtures; screenshots are design previews with sample content, not live account data. No new database migration is needed.
-
-Home also contains five explicitly labeled Coming soon previews: Feeding, Walks, Academy, Family tasks, and Lost Dog. They describe future highlights without simulated data, progress, or inactive action buttons. Each preview can be replaced independently by its live feature summary. Existing family membership and invitations remain available in the real family card.
-
-## Laura’s Feeding branch
-
-The `feature/laura-feeding` branch adds the first working Feeding and food-stock flow at `/feed`. See [the Feeding handoff](docs/feeding-handoff.md) for its migration, security model, manual test steps, NFC setup, known limits, and proposed calendar/notification adapter. Laura authorized the shared Feeding migration on 11 November 2026 and it is now applied. Do not reapply it to the shared project. No additional environment variables or dependencies are needed.
+The production application is hosted by Vercel, with SPA rewrites in `vercel.json`. Set the public configuration at build time. The target workflow is **branch → push → pull request → another member's review → passing checks → merge to main → deploy that main commit**. Earlier direct releases are historical exceptions, not the future workflow. Do not claim GitHub/main/production are aligned until their actual commit IDs have been verified. See [release steps](docs/collaboration.md).

@@ -6,7 +6,7 @@ Branch: `feature/laura-feeding`. The `20261111113735_feeding_and_stock.sql` migr
 
 - `/feed`, accessible from desktop/mobile navigation and a compact Home summary.
 - Multiple dry-food, wet-food, and treat products; normal portion and expected daily use for each.
-- Shared regular meals/day routine (24 / meals per day is the minimum regular-meal interval).
+- Saved daily routine with named/timed mixed-food meals; duplicate warning uses the shortest planned gap, an explicit override, or meals/day fallback.
 - Purchases in grams per package × package count, with date/time; opening-stock/correction baseline for already-open packages or unrecorded waste.
 - Actual meal quantities and timestamp, creator attribution and NFC source.
 - An atomic purchase/meal ledger; computed stock, no mutable stock counter. Retries with the same operation UUID update one record instead of deducting twice.
@@ -45,7 +45,7 @@ Phone push delivery and persistent calendar events are NOT implemented by this b
 ## NFC handoff (Carol)
 
 Proposed feeding URL: `<VITE_APP_URL>/feed?quick=1&household=<UUID>`.
-No credentials in the tag. The route requires authentication and existing membership through the app shell. A mismatched active household displays an error and blocks the quick action; the person can switch using the existing household selector. Confirmation performs the authorized RPC. If sign-in interrupts the URL, tap again after sign-in. PawShare now writes the URL itself through Web NFC on supported Android Chrome browsers, with permission, cancellation, timeout and explicit opt-in before overwriting existing data. iPhone browsers cannot write NFC tags; that requires a future installed PawShare app using native NFC. No separate writing app is required by this flow. Device/tag compatibility still needs real-phone testing. Carol can propose an equivalent walk URL without changing Feeding's API. No automatic feeding on URL navigation.
+No credentials in the tag. The route requires authentication and existing membership through the app shell. A mismatched active household displays an error and blocks the quick action; the person can switch using the existing household selector. Confirmation performs the authorized RPC. If sign-in interrupts the URL, tap again after sign-in. PawShare now writes the URL itself through Web NFC on supported Android Chrome browsers, with permission, cancellation, timeout and explicit opt-in before overwriting existing data. iPhone browsers cannot write NFC tags. A trusted iPhone writing app may be used once to put the URL on a sticker; everyday use opens PawShare directly without that writing app. Native in-app iPhone writing is not implemented. Device/tag compatibility still needs real-phone testing. Carol can propose an equivalent walk URL without changing Feeding's API. No automatic feeding on URL navigation.
 
 ## Manual test after migration
 
@@ -64,7 +64,7 @@ No credentials in the tag. The route requires authentication and existing member
 
 ## Remaining refinements
 
-This is the first working slice of Laura's assignment. Per-product routine quantities are explicit daily-use estimates rather than a meal-time scheduler. A meal currently has one product line; mixed meals should eventually group multiple products as one feeding event so they are not counted/warned as two meals. The current confirmation allows recording a second product intentionally. Multi-line meals, push integration, calendar persistence, physical NFC testing, and recovery of NFC intent across sign-in remain follow-up work. The ledger is paged in 500-record batches to avoid silent PostgREST truncation; a server snapshot/aggregate endpoint would improve large-history consistency and efficiency.
+Mixed-food routines and grouped meal outcomes are implemented (see below). Remaining work includes phone push integration, calendar persistence, physical NFC testing and recovery of NFC intent across sign-in. The ledger is paged in 500-record batches to avoid silent PostgREST truncation; a server snapshot/aggregate endpoint would improve large-history consistency and efficiency. Shared data refreshes manually or on window focus; the checklist clock is not a cross-device data subscription.
 
 Verification: the migration and authorization rules were executed in embedded PostgreSQL (PGlite), with pure calculation/adapter tests. Actual React product and meal forms were visually checked using labelled sample-data previews at desktop and 390px widths; this is not a hosted browser-to-Supabase onboarding test. A live Supabase transaction under the authenticated role verified purchases, idempotent retries, deductions, duplicate warnings, edits/removal, and outsider isolation; all test data was rolled back. Phone push and physical tag verification remain pending. See the chat deployment result for publication status.
 
@@ -72,7 +72,7 @@ Verification: the migration and authorization rules were executed in embedded Po
 
 The next migration `20261111123255_detailed_feeding_routine.sql` adds a shared JSON meal plan, validated on the server: 1–12 named/timed meals, up to 12 distinct household food products per meal, positive gram quantities, and optional preparation notes. The food type comes from the selected product. Saving a plan does not consume stock. Planned daily totals replace manual forecast quantities for products included in the plan; other products retain their own estimates.
 
-Record feeding/NFC can select a planned meal and prefill every ingredient, adjust actual quantities, and save the whole meal atomically. `feeding_meal_events` groups ledger lines: a mixed-food meal counts once, each product stock is deducted once, and operation retries do not duplicate the event. History still shows each food line for creator-only correction/removal. Single-food/treat logging remains available.
+Record feeding/NFC can select a planned meal and prefill every ingredient, adjust actual quantities, and save the whole meal atomically. `feeding_meal_events` groups ledger lines: a mixed-food meal counts once, each product stock is deducted once, and operation retries do not duplicate the event. History groups meal outcomes and food lines for creator-only correction/removal. Single-food/treat logging remains available.
 
 The duplicate warning uses an optional user-selected minimum gap, or the shortest gap between scheduled meals (including overnight) if left blank. The threshold is not a nutritional calculation or a requirement to feed at an exact minute. Times use the household timezone, while actual datetime inputs identify the device-local timezone as before. No phone reminders are sent by this routine until the shared notification integration exists. Maria can read `feeding_settings.meal_plan` as the source for future meal reminders; use meal UUIDs for stable source identifiers.
 
