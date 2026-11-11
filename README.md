@@ -152,3 +152,18 @@ Owners can open More → Family and tap the small pencil beside the family name.
 Home now presents a compact private dog portrait beside the dog’s name, a real household-member summary, an owner-only Invite someone shortcut, and the dog's saved details. The family summary uses the existing authorized roster RPC, with loading, empty, error and retry states. Owners and members see the appropriate family action. Missing profile fields are labeled clearly. No care logs or statistics are invented. The responsive layout was visually checked at desktop and 390px mobile widths using local preview fixtures; screenshots are design previews with sample content, not live account data. No new database migration is needed.
 
 Home also contains five explicitly labeled Coming soon previews: Feeding, Walks, Academy, Family tasks, and Lost Dog. They describe future highlights without simulated data, progress, or inactive action buttons. Each preview can be replaced independently by its live feature summary. Existing family membership and invitations remain available in the real family card.
+
+## Walks
+
+The Walks feature on `codex/walk-tracking` adds private GPS recording, history,
+calendar summaries, recorder-only corrections, reversible deletion, a Home summary
+and a confirmed NFC start link. Apply only the new
+`supabase/migrations/202611110001_walks.sql` migration to the existing project
+before using it. See [Walks setup and validation](docs/walks.md) for full rollout
+instructions and [phone GPS tests](docs/walks-gps-testing.md) for required real-device
+checks. No new browser keys or paid map service are needed.
+
+The route map currently shows the GPS path without street tiles. Stationary
+automatic ending is optional and works only with uninterrupted foreground GPS.
+Shared mobile notifications and Academy progress await the corresponding team
+interfaces. Background/screen-locked tracking has not been verified on phones.
