@@ -18,6 +18,7 @@ import { WalkProvider } from '../features/walks/WalkProvider'
 import { WalkingLesson } from '../features/walks/WalkingLesson'
 import { pendingWalkStart, rememberWalkStart } from '../features/walks/nfc'
 import { FamilyPage } from '../features/household/FamilyPage'
+import { FeedingPage } from '../features/feeding/FeedingPage'
 import { InvitationPage } from '../features/household/InvitationPage'
 import { invitationDestination, pendingInvitation } from '../features/household/invitations'
 function PrivateRoutes() {
@@ -40,5 +41,37 @@ function AccountData({ children }: { children: React.ReactNode }) { const { sess
 function PublicAuth() { const { loading } = useAuth(); const { pathname } = useLocation(); return loading ? <Loading/> : <AuthPage key={pathname}/> }
 export function Router() {
  if (configurationError) return <div className="setup"><Brand/><h1>Your pack starts here.</h1><Notice>{configurationError}</Notice><p>See README.md for the migration and authentication configuration steps. No demo data or simulated authentication is enabled.</p></div>
- return <BrowserRouter><a className="skip-link" href="#main-content">Skip to content</a><AuthProvider><AccountData><Routes><Route path="/sign-up" element={<PublicAuth/>}/><Route path="/sign-in" element={<PublicAuth/>}/><Route path="/forgot-password" element={<PublicAuth/>}/><Route path="/reset-password" element={<PublicAuth/>}/><Route path="/auth/callback" element={<Callback/>}/><Route path="/invite/:token" element={<InvitationPage/>}/><Route element={<PrivateRoutes/>}><Route path="/onboarding/household" element={<OnboardingPage/>}/><Route path="/onboarding/dog" element={<OnboardingPage/>}/><Route element={<WalkProvider><AppShell/></WalkProvider>}><Route index element={<DashboardPage/>}/><Route path="/walks" element={<WalksPage/>}/><Route path="/walks/:walkId" element={<WalkDetailPage/>}/><Route path="/walks/gps-test" element={<GpsDiagnosticPage/>}/><Route path="/walks/learn" element={<WalkingLesson/>}/><Route path="/health/vaccinations" element={<VaccinationsPage/>}/><Route path="/health/medications" element={<MedicationsPage/>}/><Route path="/health" element={<AppointmentsPage/>}/><Route path="/health/appointments" element={<AppointmentsPage/>}/><Route path="/more" element={<MorePage/>}/><Route path="/more/dog" element={<DogProfilePage/>}/><Route path="/more/family" element={<FamilyPage/>}/></Route></Route><Route path="*" element={<div className="setup"><h1>This trail ends here.</h1><Link to="/">Back home</Link></div>}/></Routes></AccountData></AuthProvider></BrowserRouter>
+ return (
+  <BrowserRouter>
+    <a className="skip-link" href="#main-content">Skip to content</a>
+    <AuthProvider>
+      <AccountData>
+        <Routes>
+          <Route path="/sign-up" element={<PublicAuth/>}/>
+          <Route path="/sign-in" element={<PublicAuth/>}/>
+          <Route path="/forgot-password" element={<PublicAuth/>}/>
+          <Route path="/reset-password" element={<PublicAuth/>}/>
+          <Route path="/auth/callback" element={<Callback/>}/>
+          <Route path="/invite/:token" element={<InvitationPage/>}/>
+          <Route element={<PrivateRoutes/>}>
+            <Route path="/onboarding/household" element={<OnboardingPage/>}/>
+            <Route path="/onboarding/dog" element={<OnboardingPage/>}/>
+            <Route element={<WalkProvider><AppShell/></WalkProvider>}>
+              <Route index element={<DashboardPage/>}/>
+              <Route path="/health" element={<AppointmentsPage/>}/><Route path="/health/appointments" element={<AppointmentsPage/>}/><Route path="/health/medications" element={<MedicationsPage/>}/><Route path="/health/vaccinations" element={<VaccinationsPage/>}/><Route path="/feed" element={<FeedingPage/>}/>
+              <Route path="/walks" element={<WalksPage/>}/>
+              <Route path="/walks/:walkId" element={<WalkDetailPage/>}/>
+              <Route path="/walks/gps-test" element={<GpsDiagnosticPage/>}/>
+              <Route path="/walks/learn" element={<WalkingLesson/>}/>
+              <Route path="/more" element={<MorePage/>}/>
+              <Route path="/more/dog" element={<DogProfilePage/>}/>
+              <Route path="/more/family" element={<FamilyPage/>}/>
+            </Route>
+          </Route>
+          <Route path="*" element={<div className="setup"><h1>This trail ends here.</h1><Link to="/">Back home</Link></div>}/>
+        </Routes>
+      </AccountData>
+    </AuthProvider>
+  </BrowserRouter>
+)
 }
