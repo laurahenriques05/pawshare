@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Button, Field, Notice, PageTitle, errorMessage } from '../../components/ui'
-import { db, appUrl } from '../../lib/supabase/client'
+import { db } from '../../lib/supabase/client'
 import { useAuth } from '../auth/AuthProvider'
 import { useHousehold } from '../household/HouseholdProvider'
 import { useFeeding } from './useFeeding'
 import { categories, dayKey, formatGrams, regularMeals, stockForecast } from './model'
+import { FeedingTagSetup } from './FeedingTagSetup'
 import { ProductForm } from './ProductForm'
 import { EntryForm } from './EntryForm'
 import type { FeedingEntry, FoodProduct } from './types'
@@ -64,6 +65,6 @@ function FeedingHousehold({ householdId, dogName, timezone }: { householdId: str
   <section className="card feeding-history"><h2>Shared history</h2><p className="muted">Everyone can correct purchases. Only the person who recorded a feeding can edit or remove it.</p>{!live.length ? <p className="muted">No records yet.</p> : <ul className="invitation-list">{live.slice(0,historyLimit).map(entry => <li key={entry.id}><div><strong>{entry.kind === 'meal' ? 'Fed' : 'Purchased'} · {data.products.find(p => p.id === entry.product_id)?.name}</strong><small>{formatGrams(Number(entry.quantity_grams))}{entry.kind === 'purchase' ? ` · ${entry.packages} × ${formatGrams(Number(entry.package_grams))}` : ''} · {names.get(entry.created_by) || 'Former family member'} · {new Date(entry.occurred_at).toLocaleString(undefined, { timeZone: timezone, hour12: false })}{entry.source === 'nfc' ? ' · NFC' : ''}</small></div>{(entry.kind === 'purchase' || entry.created_by === session?.user.id) && <div className="feeding-actions"><Button className="secondary" onClick={() => setEditor({ type: entry.kind, entry })}>Edit</Button><Button className="secondary" onClick={() => setRemove(entry)}>Remove</Button></div>}</li>)}</ul>}{live.length>historyLimit && <Button className="secondary" onClick={() => setHistoryLimit(n => n+20)}>Show more</Button>}
    {remove && <div className="feeding-editor"><Notice>Remove this {remove.kind === 'meal' ? 'feeding' : 'purchase'} record? Stock will be recalculated. Removing a purchase is blocked if it would leave negative stock.</Notice><div className="feeding-actions"><Button disabled={busy} onClick={() => void deleteEntry(remove)}>Confirm removal</Button><Button className="secondary" disabled={busy} onClick={() => setRemove(null)}>Cancel</Button></div></div>}
   </section>
-  <section className="card feeding-routine"><h2>Set up your feeding NFC tag</h2><p className="muted">In a phone NFC-writing app, choose to write a website/URL to a reusable tag. Paste this address, write it, then test it while signed in. Place the tag near the bowl. Tapping opens quick feeding; nothing is recorded until you confirm.</p><Field label="Feeding tag address" readOnly value={`${appUrl}/feed?quick=1&household=${householdId}`} onFocus={event => event.currentTarget.select()}/><p className="photo-hint">If sign-in interrupts the NFC action, tap the tag again after signing in. Tag reading/writing support depends on the phone and tag; real-device testing is still required.</p></section>
+  <FeedingTagSetup householdId={householdId}/>
  </div>
 }

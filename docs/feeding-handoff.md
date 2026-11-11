@@ -45,7 +45,7 @@ Phone push delivery and persistent calendar events are NOT implemented by this b
 ## NFC handoff (Carol)
 
 Proposed feeding URL: `<VITE_APP_URL>/feed?quick=1&household=<UUID>`.
-No credentials in the tag. The route requires authentication and existing membership through the app shell. A mismatched active household displays an error and blocks the quick action; the person can switch using the existing household selector. Confirmation performs the authorized RPC. If sign-in interrupts the URL, tap again after sign-in. Use a separate NFC-writing phone app to write a URL record; device/tag compatibility still needs real-phone testing. Carol can propose an equivalent walk URL without changing Feeding's API. No automatic feeding on URL navigation.
+No credentials in the tag. The route requires authentication and existing membership through the app shell. A mismatched active household displays an error and blocks the quick action; the person can switch using the existing household selector. Confirmation performs the authorized RPC. If sign-in interrupts the URL, tap again after sign-in. PawShare now writes the URL itself through Web NFC on supported Android Chrome browsers, with permission, cancellation, timeout and explicit opt-in before overwriting existing data. iPhone browsers cannot write NFC tags; that requires a future installed PawShare app using native NFC. No separate writing app is required by this flow. Device/tag compatibility still needs real-phone testing. Carol can propose an equivalent walk URL without changing Feeding's API. No automatic feeding on URL navigation.
 
 ## Manual test after migration
 
