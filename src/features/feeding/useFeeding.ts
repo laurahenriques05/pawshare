@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { db } from '../../lib/supabase/client'
 import { errorMessage } from '../../components/ui'
 import type { FamilyMember } from '../../lib/supabase/database.types'
-import type { FeedingEntry, FoodProduct } from './types'
+import type { FeedingEntry, FoodProduct, PlannedMeal } from './types'
 export function useFeeding(householdId: string) {
  const [products, setProducts] = useState<FoodProduct[]>([])
  const [entries, setEntries] = useState<FeedingEntry[]>([])
  const [members, setMembers] = useState<FamilyMember[]>([])
+ const [plan,setPlan]=useState<PlannedMeal[]>([])
+ const [warningHours,setWarning]=useState<number|null>(null)
  const [mealsPerDay, setMeals] = useState(2)
  const [loading, setLoading] = useState(true)
  const [error, setError] = useState('')
@@ -32,7 +34,8 @@ export function useFeeding(householdId: string) {
      db().rpc('get_household_members', { p_household: householdId }),
     ])
     if (p.error) throw p.error; if (s.error) throw s.error; if (m.error) throw m.error
-    if (active) { setProducts(p.data); setEntries(ledger); setMembers(m.data || []); setMeals(s.data?.meals_per_day || 2) }
+    if (active) { const plan=s.data?.meal_plan||[];setPlan(plan);setWarning(s.data?.warning_hours??null);
+     const effective=p.data.map(product=>{const quantities=plan.flatMap(meal=>meal.items).filter(item=>item.product_id===product.id);return quantities.length?{...product,daily_grams:quantities.reduce((sum,item)=>sum+Number(item.quantity_grams),0)}:product});setProducts(effective); setEntries(ledger); setMembers(m.data || []); setMeals(s.data?.meals_per_day || 2) }
    } catch (error) { if (active) setError(errorMessage(error)) }
    finally { if (active) setLoading(false) }
   }
@@ -41,5 +44,5 @@ export function useFeeding(householdId: string) {
   window.addEventListener('focus', focus)
   return () => { active = false; window.removeEventListener('focus', focus) }
  }, [householdId, revision, refresh])
- return { products, entries, members, mealsPerDay, loading, error, refresh }
+ return { plan, warningHours, products, entries, members, mealsPerDay, loading, error, refresh }
 }

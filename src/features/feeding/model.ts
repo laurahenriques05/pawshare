@@ -21,3 +21,5 @@ export function regularMeals(entries: FeedingEntry[], products: FoodProduct[]) {
  const regularIds = new Set(products.filter(p => p.category !== 'treat').map(p => p.id))
  return entries.filter(e => e.kind === 'meal' && !e.deleted_at && regularIds.has(e.product_id)).sort((a,b) => b.occurred_at.localeCompare(a.occurred_at))
 }
+
+export function countMealEvents(entries:FeedingEntry[]) { return new Set(entries.map(e=>e.event_id||e.id)).size }
