@@ -1,10 +1,10 @@
 # Veterinary appointments
 
-Scope: create, list and edit shared appointments via Health. No deletion, reminders, calendar writes, medical advice or other Health modules.
+Scope: create, list, edit and explicitly confirm deletion of shared appointments via Health. No reminders, calendar writes, medical advice or other Health modules.
 
 Review and coordinate application of `supabase/migrations/202611110002_vet_appointments.sql` after the initial schema. It has NOT been applied by this change. No environment changes. An unapplied migration produces a visible error with retry, not demo records.
 
-Each appointment belongs to a household (one dog per household). All current members can create/read/edit, including another member’s records. RLS checks live membership. Column grants prevent reassignment and audit spoofing. No browser deletion permission. Database triggers set creator/editor and timestamps. UTC timestamptz storage; input and 24-hour display use household.timezone, independent of the device. Missing or ambiguous DST times are rejected with an instruction to choose another time. Editing is last-write-wins; concurrent conflict resolution is not included.
+Each appointment belongs to a household (one dog per household). All current members can create/read/edit, including another member’s records. RLS checks live membership. Column grants prevent reassignment and audit spoofing. Browser deletion is available only after the separate appointment-deletion migration; RLS restricts it to current members. Database triggers set creator/editor and timestamps. UTC timestamptz storage; input and 24-hour display use household.timezone, independent of the device. Missing or ambiguous DST times are rejected with an instruction to choose another time. Editing is last-write-wins; concurrent conflict resolution is not included.
 
 ## Maria integration pending agreement
 
@@ -19,3 +19,7 @@ After coordinated migration application: run `npm run dev`, sign in and open Hea
 Repository discrepancies: README milestone sections still describe Walks/invitations as unavailable or owner-only; later migrations/code implement Walks, member invitations and leaving with ownership transfer. Account display names use profiles. No public deployment comparison or hosted authentication/email verification was performed; local Git cannot establish what Vercel currently runs. Existing Lost Dog preview is outside this task and has not been extended.
 
 Health now opens a month calendar of veterinary records, using the same table. Choose a day, press +, and save; select a listed visit to edit. Today and month navigation are available. This is a Health presentation only, with no shared calendar writes or reminder delivery.
+
+## Appointment deletion
+
+All current family members may permanently delete appointments after explicit confirmation, as agreed. Apply `20261111220003_appointment_deletion.sql` once after review; it is not applied by this change. Select a date and choose Delete, or open a calendar appointment and choose Delete appointment. Confirm/Keep appointment controls prevent accidental deletion; failed requests retain the confirmation and allow retry. Calendar and list reload after success. No shared calendar or reminder delivery exists to cancel in this checkout; future Maria integration must propagate deletion by source ID.

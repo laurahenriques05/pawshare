@@ -1,10 +1,9 @@
-import { GraduationCap, ListChecks, HeartPulse } from 'lucide-react'
+import { GraduationCap, ListChecks } from 'lucide-react'
 
 // Replace each preview with its real household summary as the feature ships.
 const features = [
  { key: 'academy', title: 'Academy', icon: GraduationCap, description: 'Your next lesson, shared XP, and little wins together.' },
  { key: 'tasks', title: 'Family tasks', icon: ListChecks, description: 'Upcoming care tasks and who’s taking care of what.' },
- { key: 'health', title: 'Health', icon: HeartPulse, description: 'Vet visits, vaccinations, and health reminders in one place.' },
 ]
 
 export function HomeFeaturePreviews() {

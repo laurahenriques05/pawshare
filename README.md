@@ -178,3 +178,11 @@ The route map currently shows the GPS path without street tiles. Stationary
 automatic ending is optional and works only with uninterrupted foreground GPS.
 Shared mobile notifications and Academy progress await the corresponding team
 interfaces. Background/screen-locked tracking has not been verified on phones.
+
+## Health and account additions
+
+See [remaining Health/account setup and release checks](docs/remaining-health-account.md)
+for treatment history, vet contacts, private documents, weight synchronization,
+Home summary, account settings and the server-side deletion rollout. New migrations
+and Edge Functions require coordinated review/deployment; local UI changes do not
+apply schema or publish server functions.
