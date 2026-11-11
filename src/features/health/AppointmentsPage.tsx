@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { AppointmentCalendar } from './AppointmentCalendar'
 import { useEffect, useState } from 'react'
 import { Button, Field, Notice, PageTitle, errorMessage } from '../../components/ui'
@@ -34,6 +35,8 @@ function Appointments({ id, zone }: { id: string; zone: string }) {
  setSelected(time.slice(0,10));setMonth(time.slice(0,7));reset();setFormOpen(false);setSaved(true);setRetry(v=>v+1)
  }catch(e){setSaveError(errorMessage(e))}finally{setSaving(false)}}
  return <div className="walk-page vet-page"><PageTitle eyebrow="HEALTH" title="Veterinary appointments">Shared care, in your family time zone: {zone}. Times use the 24-hour clock.</PageTitle>
+ <Link className="button secondary" to="/health/vaccinations">Vaccination records</Link>
+ <Link className="button secondary" to="/health/medications">Medication schedules &amp; dose logs</Link>
  <AppointmentCalendar month={month} selected={selected} today={today} rows={rows} zone={zone} loading={loading||!!error} onEdit={row=>{setFormOpen(true);setEditing(row);setTitle(row.title);setTime(localTime(row.starts_at,zone));setLocation(row.location);setNotes(row.notes);setSaved(false);setSaveError('')}} onMonth={setMonth} onSelect={day=>{setSelected(day);setSaved(false)}} onAdd={()=>{reset();setTime(selected+'T09:00');setFormOpen(true);setSaved(false)}}/>
  {saved&&<Notice>Appointment saved.</Notice>}
  {formOpen&&<section className="card"><h2>{editing?'Edit appointment':'New appointment'}</h2><form onSubmit={save}><fieldset disabled={saving} className="vet-fields"><Field label="Title" required maxLength={120} value={title} onChange={e=>setTitle(e.target.value)}/><Field label={`Date and time (${zone})`} type="datetime-local" required value={time} onChange={e=>setTime(e.target.value)}/><Field label="Vet / location" maxLength={200} value={location} onChange={e=>setLocation(e.target.value)}/><Field label="Notes" maxLength={2000} value={notes} onChange={e=>setNotes(e.target.value)}/>{saveError&&<Notice error>{saveError} Please check your access and try saving again.</Notice>}<div className="walk-actions"><Button type="submit">{saving?'Saving…':'Save appointment'}</Button><Button type="button" className="secondary" onClick={()=>{reset();setFormOpen(false)}}>Cancel</Button></div></fieldset></form>{saved&&<Notice>Appointment saved.</Notice>}</section>}

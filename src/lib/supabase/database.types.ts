@@ -1,3 +1,6 @@
+export type Vaccination = { id:string; household_id:string; name:string; given_on:string; next_due_on:string|null; veterinarian:string; batch_number:string; notes:string; created_by:string; updated_by:string; created_at:string; updated_at:string }
+export type MedicationSchedule = { id:string; household_id:string; name:string; instructions:string; created_by:string; updated_by:string; created_at:string; updated_at:string }
+export type MedicationDose = { id:string; schedule_id:string; scheduled_at:string; status:'scheduled'|'given'|'skipped'; administered_at:string|null; recorded_by:string|null; recorded_at:string|null; updated_at:string; notes:string }
 export type VetAppointment = { id: string; household_id: string; title: string; starts_at: string; location: string; notes: string; created_by: string; updated_by: string; created_at: string; updated_at: string }
 // Initial migration contract. Regenerate with the Supabase CLI after schema changes.
 export type Profile = { id: string; display_name: string; created_at: string }
@@ -11,6 +14,9 @@ export type Walk = { id: string; household_id: string; dog_id: string; walker_id
 export type WalkPoint = { walk_id: string; seq: number; recorded_at: string; latitude: number; longitude: number; accuracy: number }
 type Table<R, I> = { Row: R; Insert: I; Update: Partial<I>; Relationships: [] }
 export type Database = { public: { Tables: {
+ vaccinations: Table<Vaccination,Pick<Vaccination,'household_id'|'name'|'given_on'|'next_due_on'|'veterinarian'|'batch_number'|'notes'>>;
+ medication_schedules: Table<MedicationSchedule,never>;
+ medication_doses: Table<MedicationDose,never>;
  vet_appointments: Table<VetAppointment, Pick<VetAppointment,'household_id'|'title'|'starts_at'|'location'|'notes'>>;
  walks: Table<Walk, never>;
  walk_points: Table<WalkPoint, never>;
@@ -20,6 +26,9 @@ export type Database = { public: { Tables: {
  invitations: Table<Invitation & { token_hash: string }, never>;
  dogs: Table<Dog, Omit<Dog,'id'|'created_at'>>;
 }; Views: { [_ in never]: never }; Functions: {
+ save_medication_schedule: { Args:{p_household:string;p_schedule:string|null;p_name:string;p_instructions:string;p_times:string[]}; Returns:string };
+ reschedule_medication_dose: { Args:{p_dose:string;p_time:string}; Returns:undefined };
+ log_medication_dose: { Args:{p_dose:string;p_status:string;p_actual:string|null;p_notes:string}; Returns:undefined };
  start_walk: { Args: { p_dog: string }; Returns: Walk };
  append_walk_points: { Args: { p_walk: string; p_points: { seq: number; recorded_at: string; latitude: number; longitude: number; accuracy: number }[] }; Returns: number };
  finish_walk: { Args: { p_walk: string; p_ended_at: string; p_reason: string }; Returns: Walk };
