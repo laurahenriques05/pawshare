@@ -1,4 +1,4 @@
-import type { FoodProduct, FeedingEntry, FeedingSettings, FeedingAudit, PlannedMeal } from '../../features/feeding/types'
+import type { FoodProduct, FeedingEntry, FeedingSettings, FeedingAudit, PlannedMeal, MealEvent } from '../../features/feeding/types'
 // Initial migration contract. Regenerate with the Supabase CLI after schema changes.
 export type Profile = { id: string; display_name: string; created_at: string }
 export type Household = { id: string; name: string; timezone: string; created_by: string; created_at: string }
@@ -9,6 +9,7 @@ export type InvitationPreview = { household_id: string; household_name: string; 
 export type FamilyMember = { user_id: string; display_name: string; role: string; joined_at: string }
 type Table<R, I> = { Row: R; Insert: I; Update: Partial<I>; Relationships: [] }
 export type Database = { public: { Tables: {
+ feeding_meal_events: Table<MealEvent, never>;
  food_products: Table<FoodProduct, never>;
  feeding_entries: Table<FeedingEntry, never>;
  feeding_settings: Table<FeedingSettings, never>;
@@ -19,6 +20,7 @@ export type Database = { public: { Tables: {
  invitations: Table<Invitation & { token_hash: string }, never>;
  dogs: Table<Dog, Omit<Dog,'id'|'created_at'>>;
 }; Views: { [_ in never]: never }; Functions: {
+ save_meal_result: {Args:{p_household:string;p_id:string;p_items:{product_id:string;quantity_grams:number;eaten_grams:number}[];p_at:string;p_source?:string;p_allow_duplicate?:boolean;p_routine_meal?:string|null;p_outcome?:string;p_notes?:string;p_remove?:boolean};Returns:string};
  save_feeding_plan: { Args: { p_household:string; p_plan:PlannedMeal[]; p_warning:number|null }; Returns:undefined };
  record_feeding_meal: { Args:{p_household:string;p_id:string;p_items:{product_id:string;quantity_grams:number}[];p_at:string;p_source:string;p_allow_duplicate:boolean;p_routine_meal:string|null}; Returns:string };
  save_food_product: { Args: { p_household: string; p_id: string; p_name: string; p_category: string; p_portion: number; p_daily: number; p_opening: number; p_reminder: number }; Returns: string };
