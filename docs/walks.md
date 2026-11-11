@@ -1,8 +1,11 @@
 # Walks implementation and rollout
 
-Branch: `codex/walk-tracking`. This feature is implemented locally; it is not yet
-installed in the shared Supabase project or deployed. `origin/main` was fetched
-and matched this branch's base before implementation.
+Branch: `codex/walk-tracking`, merged into `main` via PR #2 (5433773).
+The Walks migration was installed on 2026-11-11 in the existing shared project
+`jqxeszipztucnqcywkab`. Verified both tables have RLS enabled, authenticated SELECT
+only, no direct authenticated writes, and no anonymous SELECT. Do not rerun the
+migration on this project. Production frontend deployment is pending access to
+the Vercel account/team that owns `pawshare-laurahenriques05.vercel.app`.
 
 ## Install the database feature
 
@@ -23,10 +26,11 @@ SQL. Coordinate migration history with the administrator; do not reapply older
 migrations or reset the shared database. Regenerate the database types when the
 connected CLI workflow is available. The browser types have been updated by hand.
 
-The current desktop session reached the Supabase sign-in screen. There was no
-Supabase CLI binary, local CLI project configuration, or administrative connector
-available. The publishable browser key can use the feature after installation;
-it cannot run DDL. No new credentials have been requested or stored.
+The migration was applied through the authenticated Supabase dashboard SQL
+Editor. A preflight confirmed the exact project and that both new tables were
+absent, then the complete checked-in migration ran successfully in a transaction.
+No existing household, dog or authentication records were modified. The browser
+key remains unchanged; no new credentials were requested or stored.
 
 ## Implemented
 
