@@ -28,7 +28,7 @@ Feature owners implement their own UI, rules, migrations and tests. Coordinate s
 - A duplicate regular-meal warning only when another meal is recorded too soon. Treats are separate. The threshold uses the shortest planned gap, an explicit override, or the meals/day fallback.
 - Feeding NFC URL and confirmed quick logging; optional in-app tag writing on compatible Android Chrome browsers.
 
-Walks, Academy, Health and family tasks/calendar are future features represented by Coming soon previews. Phone push delivery, GPS routes, walk NFC and persistent calendar integration are not implemented here. Lost Dog Mode has been removed from scope. Current shared Feeding data refreshes on manual refresh/window focus; the clock update does not provide cross-device live synchronisation.
+Walks includes GPS recording, private active routes, completed history, statistics, corrections, a Home summary and a confirmed NFC start URL. Academy, Health and family tasks/calendar remain future integrations. Shared phone push delivery and persistent calendar integration are not implemented here. Lost Dog Mode has been removed from scope. Current shared Feeding data refreshes on manual refresh/window focus; the clock update does not provide cross-device live synchronisation.
 
 ## Run locally with the shared database
 
@@ -88,7 +88,7 @@ https://pawshare-laurahenriques05.vercel.app/feed?quick=1&household=<household U
 
 The person must sign in and belong to that household. Tapping opens the confirmation flow; it never records a meal just by opening a URL. If sign-in loses the quick-action intent, tap again after signing in.
 
-Compatible Android Chrome devices can write tags from PawShare. iPhone browsers cannot write NFC tags: use a trusted iPhone NFC-writing app once to store the URL. Everyday use opens PawShare directly without that writing app. Physical tags and device-specific behaviour still need testing. Walk tags are reserved for Carol's future implementation.
+Compatible Android Chrome devices can write tags from PawShare. iPhone browsers cannot write NFC tags: use a trusted iPhone NFC-writing app once to store the URL. Everyday use opens PawShare directly without that writing app. Physical tags and device-specific behaviour still need testing. Walk tags can use `/walks?action=start`; see docs/walks.md for the confirmation flow and phone-testing limitations.
 
 ## Commands and verification
 
@@ -162,7 +162,7 @@ Owners can open More → Family and tap the small pencil beside the family name.
 
 Home now presents a compact private dog portrait beside the dog’s name, a real household-member summary, an owner-only Invite someone shortcut, and the dog's saved details. The family summary uses the existing authorized roster RPC, with loading, empty, error and retry states. Owners and members see the appropriate family action. Missing profile fields are labeled clearly. No care logs or statistics are invented. The responsive layout was visually checked at desktop and 390px mobile widths using local preview fixtures; screenshots are design previews with sample content, not live account data. No new database migration is needed.
 
-Home also contains five explicitly labeled Coming soon previews: Feeding, Walks, Academy, Family tasks, and Lost Dog. They describe future highlights without simulated data, progress, or inactive action buttons. Each preview can be replaced independently by its live feature summary. Existing family membership and invitations remain available in the real family card.
+Home contains live Feeding and Walks summaries, with Coming soon previews for Academy, Family tasks and Health. They describe future highlights without simulated data, progress, or inactive action buttons. Each preview can be replaced independently by its live feature summary. Existing family membership and invitations remain available in the real family card.
 
 ## Walks
 

@@ -40,3 +40,17 @@ Feature owners propose append-only migrations; Laura is the proposed coordinator
 - Are mobile/keyboard/error states usable?
 - Do README and handoff match the final behaviour and its verified limits?
 - Are secrets absent and production data untouched except as explicitly authorized?
+
+## Feeding recovery integration (11 November 2026)
+
+`codex/restore-feeding` merges `origin/feature/laura-feeding` (24ab559) into
+current main (aa47e4a), preserving the Feeding source and migrations alongside
+Walks. The integration repairs duplicate Home preview entries and duplicate
+shared RPC type declarations from the automatic merge. Both features have active
+navigation and Home summaries. No hosted data or migrations were reapplied.
+
+Local validation: 111 tests passed, typecheck and production build passed; the
+authenticated local `/feed` screen loaded the hosted household data successfully,
+and Home displayed both Feeding and Walks. Production has not been updated by
+this recovery branch. Another group member must review the PR before merge and
+deployment of the resulting main commit.

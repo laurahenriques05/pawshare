@@ -38,9 +38,6 @@ export type Database = { public: { Tables: {
  leave_household: { Args: { p_household: string; p_new_owner?: string | null }; Returns: undefined };
  create_household_invitation: { Args: { p_household: string; p_email: string }; Returns: { id: string; token: string; expires_at: string } };
  preview_household_invitation: { Args: { p_token: string }; Returns: InvitationPreview };
- leave_household: { Args: { p_household: string; p_new_owner?: string | null }; Returns: undefined };
- create_household_invitation: { Args: { p_household: string; p_email: string }; Returns: { id: string; token: string; expires_at: string } };
- preview_household_invitation: { Args: { p_token: string }; Returns: InvitationPreview };
  accept_household_invitation: { Args: { p_token: string }; Returns: string };
  revoke_household_invitation: { Args: { p_invitation: string }; Returns: undefined };
  get_household_members: { Args: { p_household: string }; Returns: FamilyMember[] };
