@@ -1,3 +1,7 @@
+export type Vaccination = { id:string; household_id:string; name:string; given_on:string; next_due_on:string|null; veterinarian:string; batch_number:string; notes:string; created_by:string; updated_by:string; created_at:string; updated_at:string }
+export type MedicationSchedule = { id:string; household_id:string; name:string; instructions:string; created_by:string; updated_by:string; created_at:string; updated_at:string }
+export type MedicationDose = { id:string; schedule_id:string; scheduled_at:string; status:'scheduled'|'given'|'skipped'; administered_at:string|null; recorded_by:string|null; recorded_at:string|null; updated_at:string; notes:string }
+export type VetAppointment = { id: string; household_id: string; title: string; starts_at: string; location: string; notes: string; created_by: string; updated_by: string; created_at: string; updated_at: string }
 import type { FoodProduct, FeedingEntry, FeedingSettings, FeedingAudit, PlannedMeal, MealEvent } from '../../features/feeding/types'
 // Initial migration contract. Regenerate with the Supabase CLI after schema changes.
 export type Profile = { id: string; display_name: string; created_at: string }
@@ -11,6 +15,10 @@ export type Walk = { id: string; household_id: string; dog_id: string; walker_id
 export type WalkPoint = { walk_id: string; seq: number; recorded_at: string; latitude: number; longitude: number; accuracy: number }
 type Table<R, I> = { Row: R; Insert: I; Update: Partial<I>; Relationships: [] }
 export type Database = { public: { Tables: {
+ vaccinations: Table<Vaccination,Pick<Vaccination,'household_id'|'name'|'given_on'|'next_due_on'|'veterinarian'|'batch_number'|'notes'>>;
+ medication_schedules: Table<MedicationSchedule,never>;
+ medication_doses: Table<MedicationDose,never>;
+ vet_appointments: Table<VetAppointment, Pick<VetAppointment,'household_id'|'title'|'starts_at'|'location'|'notes'>>;
  feeding_meal_events: Table<MealEvent, never>;
  food_products: Table<FoodProduct, never>;
  feeding_entries: Table<FeedingEntry, never>;
@@ -24,6 +32,9 @@ export type Database = { public: { Tables: {
  invitations: Table<Invitation & { token_hash: string }, never>;
  dogs: Table<Dog, Omit<Dog,'id'|'created_at'>>;
 }; Views: { [_ in never]: never }; Functions: {
+ save_medication_schedule: { Args:{p_household:string;p_schedule:string|null;p_name:string;p_instructions:string;p_times:string[]}; Returns:string };
+ reschedule_medication_dose: { Args:{p_dose:string;p_time:string}; Returns:undefined };
+ log_medication_dose: { Args:{p_dose:string;p_status:string;p_actual:string|null;p_notes:string}; Returns:undefined };
  save_meal_result: {Args:{p_household:string;p_id:string;p_items:{product_id:string;quantity_grams:number;eaten_grams:number}[];p_at:string;p_source?:string;p_allow_duplicate?:boolean;p_routine_meal?:string|null;p_outcome?:string;p_notes?:string;p_remove?:boolean};Returns:string};
  save_feeding_plan: { Args: { p_household:string; p_plan:PlannedMeal[]; p_warning:number|null }; Returns:undefined };
  record_feeding_meal: { Args:{p_household:string;p_id:string;p_items:{product_id:string;quantity_grams:number}[];p_at:string;p_source:string;p_allow_duplicate:boolean;p_routine_meal:string|null}; Returns:string };

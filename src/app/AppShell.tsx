@@ -17,7 +17,7 @@ export function AppShell() {
         <NavLink to="/feed"><Utensils size={20}/>Feed</NavLink>
         <NavLink to="/walks"><Footprints size={20}/>Walks</NavLink>
         <span aria-disabled="true"><GraduationCap size={20}/>Academy<small>Soon</small></span>
-        <span aria-disabled="true"><HeartPulse size={20}/>Health<small>Soon</small></span>
+        <NavLink to="/health"><HeartPulse size={20}/>Health</NavLink>
         <NavLink to="/more"><Ellipsis size={20}/>More</NavLink>
       </nav>
       <div className="sidebar-bottom">
@@ -38,7 +38,7 @@ export function AppShell() {
       <NavLink to="/feed"><Utensils/><span>Feed</span></NavLink>
       <NavLink to="/walks"><Footprints/><span>Walks</span></NavLink>
       <span aria-disabled="true"><GraduationCap/><span>Academy</span></span>
-      <NavLink to="/more"><Ellipsis/><span>More</span></NavLink>
+      <NavLink to="/health"><HeartPulse/><span>Health</span></NavLink><NavLink to="/more"><Ellipsis/><span>More</span></NavLink>
     </nav>
   </div>
 )
