@@ -1,3 +1,4 @@
+export type VetAppointment = { id: string; household_id: string; title: string; starts_at: string; location: string; notes: string; created_by: string; updated_by: string; created_at: string; updated_at: string }
 // Initial migration contract. Regenerate with the Supabase CLI after schema changes.
 export type Profile = { id: string; display_name: string; created_at: string }
 export type Household = { id: string; name: string; timezone: string; created_by: string; created_at: string }
@@ -10,6 +11,7 @@ export type Walk = { id: string; household_id: string; dog_id: string; walker_id
 export type WalkPoint = { walk_id: string; seq: number; recorded_at: string; latitude: number; longitude: number; accuracy: number }
 type Table<R, I> = { Row: R; Insert: I; Update: Partial<I>; Relationships: [] }
 export type Database = { public: { Tables: {
+ vet_appointments: Table<VetAppointment, Pick<VetAppointment,'household_id'|'title'|'starts_at'|'location'|'notes'>>;
  walks: Table<Walk, never>;
  walk_points: Table<WalkPoint, never>;
  profiles: Table<Profile, Pick<Profile,'id'|'display_name'>>;
