@@ -1,3 +1,4 @@
+import { ListChecks } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Button, Field, Notice, errorMessage } from '../../components/ui'
 import { db } from '../../lib/supabase/client'
@@ -30,7 +31,7 @@ export function FeedingRoutineForm({ householdId, products, plan, count, warning
    setEditing(false);onSaved()
   } catch(error) {setError(errorMessage(error))} finally {setBusy(false)}
  }
- return <section className="card feeding-routine feeding-plan"><div className="feeding-routine-heading"><div><h2>Daily feeding routine</h2><p className="photo-hint">{plan.length ? `${plan.length} meals per day · ${timezone}` : 'A simple plan for every bowl.'}</p></div>{!editing&&plan.length>0&&<Button type="button" className="secondary" onClick={openEditor}>Edit routine</Button>}</div>
+ return <section className="card feeding-routine feeding-plan"><div className="feeding-routine-heading"><div><h2 className="feeding-section-heading"><ListChecks size={20} aria-hidden="true"/>Daily feeding routine</h2><p className="photo-hint">{plan.length ? `${plan.length} meals per day · ${timezone}` : 'A simple plan for every bowl.'}</p></div>{!editing&&plan.length>0&&<Button type="button" className="secondary" onClick={openEditor}>Edit routine</Button>}</div>
  {!products.length ? <Notice>Add your food products in the Food cupboard first, then build your routine.</Notice> : !editing ? plan.length ? <>
  <ol className="feeding-routine-summary">{[...plan].sort((a,b)=>a.time.localeCompare(b.time)).map(meal=><li key={meal.id}><time>{meal.time}</time><div><h3>{meal.name}</h3><ul>{meal.items.map(item=>{const product=products.find(p=>p.id===item.product_id);return <li key={item.product_id}><strong>{formatGrams(Number(item.quantity_grams))}</strong> {product?.name||'Food product'}{product&&<span className="feeding-food-type"> · {categories[product.category]}</span>}</li>})}</ul>{meal.notes&&<p className="feeding-meal-notes">{meal.notes}</p>}</div></li>)}</ol>
  <details className="feeding-routine-details"><summary>Daily totals & meal spacing</summary><ul>{products.map(product=>{const quantity=plan.flatMap(meal=>meal.items).filter(item=>item.product_id===product.id).reduce((sum,item)=>sum+Number(item.quantity_grams),0);return quantity>0?<li key={product.id}>{product.name}: <strong>{formatGrams(quantity)}/day</strong></li>:null})}</ul><p className="photo-hint">Duplicate-meal warning within {Number(warningHours||24/count).toFixed(1)} hours of another regular meal. Treats are separate.</p></details>
