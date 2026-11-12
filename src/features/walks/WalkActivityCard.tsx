@@ -46,6 +46,6 @@ export function WalkActivityCard({ id, title, startedAt, location, points, meter
   <div className="walk-activity-heading"><span className="icon-tile"><Footprints size={20}/></span><div><p className="muted">{new Date(startedAt).toLocaleString()}</p><h3><Link to={`/walks/${id}`}>{title}</Link></h3></div></div>
   <WalkStats meters={meters} seconds={seconds}/>
   {points ? <RouteMap points={points} compact/> : loadRoute && <SavedRoutePreview id={id}/>}
-  <div className="walk-activity-footer"><span className="muted">{location || 'Saved GPS walk'}</span><Link to={`/walks/${id}`}>View walk <ArrowUpRight size={16}/></Link></div>
+  <div className="walk-activity-footer"><Link to={`/walks/${id}`}>View walk <ArrowUpRight size={16}/></Link></div>
  </article>
 }

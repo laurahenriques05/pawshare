@@ -178,24 +178,28 @@ Confirming the end in Walks opens the completed route after it is saved; offline
 completion displays a pending-sync notice. NFC on the leash opens the start
 confirmation, while the phone carried by the walker supplies GPS positions.
 
-Route maps use official Google Maps when the optional public browser key is
-configured; without it they show an explicitly labelled OpenStreetMap preview.
-Both offer worldwide coverage, a dark-green GPS trace, deliberate trackpad/touch pinch zoom,
-dragging and Fit route controls. Ordinary wheel scrolling leaves maps unchanged. See [Google Maps setup](docs/walks-google-maps.md). The view follows each
-walk's saved coordinates; no city is hardcoded. History/detail cards and accumulated distance use kilometres, alongside
-duration and average speed. Street maps require internet and share viewed-area/device information with the
-selected map provider. The local development app includes three presentation walks in Past adventures
-(Benfica, Expo and Alvalade), with no demonstration badges, contributing to local
-Walks totals. These records and their detail pages are excluded from production;
-real saved household data and Home remain intact;
-see [demo provenance](docs/walks-demo.md). No new migration is required. Stationary
-automatic ending is optional and works only with uninterrupted foreground GPS.
-Shared mobile notifications and Academy progress await the corresponding team
-interfaces. Background/screen-locked tracking has not been verified on phones.
+Route maps default to a light vector basemap with white streets, subdued buildings,
+green parks and the application's dark-green GPS trace. MapLibre GL JS 6.18.0
+renders public OpenFreeMap data worldwide; there is no fixed city boundary or
+API key requirement for this provider. A Leaflet street-map fallback supports
+browsers unable to initialize the vector renderer. The previously prepared Google
+provider remains optional; see [Google setup](docs/walks-google-maps.md).
 
-The current local map presentation uses a muted palette inspired by Apple Maps;
-it is not Apple cartography. Explanatory provider banners and the World button
-are removed; the required cartographic attribution remains visible in the map
-corner. Two-finger trackpad pinch (Ctrl+wheel browser signal), touch pinch and
-explicit zoom controls are supported; ordinary scroll and double-click do not
-zoom. Actual touch-device behaviour still requires validation.
+Each map has Start/Finish markers, **Reproduce route** and Fit route controls.
+Playback draws the recorded path over approximately 12 seconds with a moving point;
+Stop replay restores the whole route. It does not record GPS, change saved points,
+recalculate statistics or connect gaps. Reduced-motion preferences show the full
+route without animation. Normal scrolling does not zoom, while explicit pinch,
+keyboard and +/- controls remain available. Map credits sit below the vector image.
+
+History/detail cards and accumulated distance use kilometres, alongside duration
+and average speed. Three local presentation walks in Past adventures (Benfica,
+Expo and Alvalade) contribute to local totals without demonstration badges. They
+and their detail pages are excluded from production; real household data and Home
+stay intact. See [presentation provenance](docs/walks-demo.md). No new migration
+is required. Street maps need internet; requests share viewed-area/IP information
+with the provider. See [map style notices](public/licenses/walk-map-style.txt).
+
+Stationary automatic ending remains optional and foreground-only. Shared mobile
+notifications and Academy progress await the team's interfaces. Background or
+screen-locked GPS and physical touch-device reliability remain unverified.

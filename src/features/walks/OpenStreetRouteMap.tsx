@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import type { Map as LeafletMap } from 'leaflet'
 import { Button } from '../../components/ui'
 import { type Point } from './gps'
-import { mapCoordinates, mapSegments } from './mapGeometry'
+import { mapCoordinates } from './mapGeometry'
 import { createPinchZoomHandler } from './mapGestures'
 import 'leaflet/dist/leaflet.css'
+import { type ReplayFrame } from './routeReplay'
+import { useRouteReplay } from './useRouteReplay'
+import { RouteMapControls } from './RouteMapControls'
 import './walks.css'
 
 /** Coordinates stay in the browser; only visible map tile areas go to OSM. */
@@ -13,6 +16,11 @@ export function OpenStreetRouteMap({ points, compact = false }: { points: Point[
  const fit = useRef<() => void>(() => {})
  const draw = useRef<(points: Point[]) => void>(() => {})
  const latest = useRef(points)
+ const replay = useRouteReplay(points)
+ const renderFrame = useRef<(frame: ReplayFrame, playing: boolean) => void>(() => {})
+ const latestFrame = useRef({ frame: replay.frame, playing: replay.playing })
+ const [ready, setReady] = useState(false)
+ useEffect(() => { latestFrame.current = { frame: replay.frame, playing: replay.playing }; renderFrame.current(replay.frame, replay.playing) }, [replay.frame, replay.playing])
  useEffect(() => { latest.current = points; draw.current(points) }, [points])
  const [visible, setVisible] = useState(false)
  const [loading, setLoading] = useState(true)
@@ -33,7 +41,7 @@ export function OpenStreetRouteMap({ points, compact = false }: { points: Point[
   let instance: LeafletMap | undefined
   let resize: ResizeObserver | undefined
   let removeWheel: (()=>void) | undefined
-  setLoading(true); setError('')
+  setLoading(true); setReady(false); setError('')
   void import('leaflet').then(L => {
    if (disposed || !host.current) return
    const coordinates = mapCoordinates(latest.current)
@@ -59,32 +67,40 @@ export function OpenStreetRouteMap({ points, compact = false }: { points: Point[
    tiles.on('load', () => { if (!disposed) setLoading(false) })
    tiles.addTo(instance)
    const routeLayer = L.layerGroup().addTo(instance)
+   const lines = L.layerGroup().addTo(instance)
+   const cursor = L.circleMarker(coordinates[0], { radius: 6, color: '#fffdf7', weight: 3, fillColor: '#425c39', fillOpacity: 1 })
+   renderFrame.current = (frame, playing) => {
+    lines.clearLayers()
+    for (const coordinates of frame.lines) {
+     L.polyline(coordinates, { color: '#fffdf7', weight: 8, opacity: 1, interactive: false }).addTo(lines)
+     L.polyline(coordinates, { color: '#425c39', weight: 5, opacity: 1, interactive: false }).addTo(lines)
+    }
+    if (playing && frame.cursor) cursor.setLatLng(frame.cursor).addTo(instance!)
+    else cursor.remove()
+   }
    draw.current = next => {
     routeLayer.clearLayers()
     const current = mapCoordinates(next)
     if (!current.length) return
     bounds = L.latLngBounds(current)
-    for (const coordinates of mapSegments(next)) {
-     L.polyline(coordinates, { color: '#fffdf7', weight: 8, opacity: 1, interactive: false }).addTo(routeLayer)
-     L.polyline(coordinates, { color: '#425c39', weight: 5, opacity: 1, interactive: false }).addTo(routeLayer)
-    }
+    renderFrame.current(latestFrame.current.frame, latestFrame.current.playing)
     L.circleMarker(current[0], { radius: 6, color: '#425c39', weight: 3, fillColor: '#fffdf7', fillOpacity: 1 }).bindTooltip('Start').addTo(routeLayer)
     L.circleMarker(current.at(-1)!, { radius: 5, color: '#fffdf7', weight: 2, fillColor: '#425c39', fillOpacity: 1 }).bindTooltip('Finish').addTo(routeLayer)
    }
-   draw.current(latest.current)
+   draw.current(latest.current); setReady(true)
    L.control.scale({ imperial: false }).addTo(instance)
    fitRoute()
    resize = new ResizeObserver(() => instance?.invalidateSize({ animate: false }))
    resize.observe(host.current)
   }).catch(() => { if (!disposed) { setLoading(false); setError('The map could not load. Check your connection and retry.') } })
-  return () => { disposed = true; resize?.disconnect(); removeWheel?.(); instance?.remove(); fit.current = () => {}; draw.current = () => {} }
+  return () => { disposed = true; resize?.disconnect(); removeWheel?.(); instance?.remove(); fit.current = () => {}; draw.current = () => {}; renderFrame.current = () => {} }
  }, [visible, retry])
  if (!valid.length) return <p className="walk-empty">No GPS route recorded. Time-only walks are still included in summaries.</p>
  return <figure className={`walk-route-map${compact ? ' compact' : ''}`}>
   <div ref={host} className="walk-map-canvas" role="region" aria-label="Interactive walking route map. Pinch with two fingers to zoom. Normal scrolling leaves the map unchanged. Keyboard and zoom buttons are available."/>
   {visible && loading && <p className="walk-map-status" role="status">Loading street map…</p>}
   {error && <p className="walk-map-status" role="alert">{error} <Button className="secondary" onClick={() => setRetry(n => n + 1)}>Retry map</Button></p>}
-  <div className="walk-map-tools"><span><span className="walk-route-start"/> Start <span className="walk-route-finish"/> Finish</span><div><Button className="secondary" onClick={() => fit.current()}>Fit route</Button></div></div>
-  <figcaption>Pinch with two fingers to zoom. Scroll normally to move down the page. GPS gaps stay open. <a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noreferrer">Map privacy</a></figcaption>
+  <RouteMapControls playing={replay.playing} disabled={!ready || !replay.canReplay} status={replay.status} onFit={() => fit.current()} onReplay={() => { if (!replay.playing) fit.current(); replay.toggle() }}/>
+
  </figure>
 }

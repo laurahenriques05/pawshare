@@ -1,13 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/ui'
 import type { Point } from './gps'
-import { mapCoordinates, mapSegments } from './mapGeometry'
+import { mapCoordinates } from './mapGeometry'
 import { GOOGLE_MAP_ERROR, loadGoogleMaps } from './googleMaps'
+import { type ReplayFrame } from './routeReplay'
+import { useRouteReplay } from './useRouteReplay'
+import { RouteMapControls } from './RouteMapControls'
 import './walks.css'
 
 export default function GoogleRouteMap({ points, compact = false }: { points: Point[]; compact?: boolean }) {
  const host = useRef<HTMLDivElement>(null)
  const latest = useRef(points)
+ const replay = useRouteReplay(points)
+ const renderFrame = useRef<(frame: ReplayFrame, playing: boolean) => void>(() => {})
+ const latestFrame = useRef({ frame: replay.frame, playing: replay.playing })
+ const [ready, setReady] = useState(false)
+ useEffect(() => { latestFrame.current = { frame: replay.frame, playing: replay.playing }; renderFrame.current(replay.frame, replay.playing) }, [replay.frame, replay.playing])
  const draw = useRef<(points: Point[]) => void>(() => {})
  const fit = useRef<() => void>(() => {})
  const [visible, setVisible] = useState(false)
@@ -32,7 +40,7 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
   let core: google.maps.CoreLibrary | undefined
   let resize: ResizeObserver | undefined
   const paths: google.maps.Polyline[] = []
-  setLoading(true); setError('')
+  setLoading(true); setReady(false); setError('')
   const fail = () => { if (!disposed) { setLoading(false); setError('Google Maps is unavailable. Check the map configuration or connection, then retry.') } }
   window.addEventListener(GOOGLE_MAP_ERROR, fail)
   const timeout = window.setTimeout(fail, 30_000)
@@ -59,7 +67,6 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
     title: feature.getProperty('kind') === 'start' ? 'Start' : 'Finish',
    }))
    draw.current = next => {
-    paths.splice(0).forEach(path => path.setMap(null))
     map.data.forEach(feature => map.data.remove(feature))
     const coords = mapCoordinates(next)
     if (!coords.length) return
@@ -69,18 +76,21 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
      new core!.LatLng(south, west, true),
      new core!.LatLng(north, east, true),
     )
-    for (const line of mapSegments(next)) {
-     const path = line.map(([lat, lng]) => new core!.LatLng(lat, lng, true))
-     for (const [strokeColor, strokeWeight] of [['#fffdf7', 8], ['#425c39', 5]] as const) {
-      paths.push(new maps.Polyline({ map, path, strokeColor, strokeWeight, strokeOpacity: 1, clickable: false }))
-     }
-    }
     const [start, end] = [coords[0], coords.at(-1)!]
     map.data.addGeoJson({ type: 'FeatureCollection', features: [start, end].map(([lat, lng], index) => ({
      type: 'Feature', properties: { kind: index ? 'finish' : 'start' }, geometry: { type: 'Point', coordinates: [lng, lat] },
     })) })
    }
-   draw.current(latest.current)
+   renderFrame.current = (frame, playing) => {
+    paths.splice(0).forEach(path => path.setMap(null))
+    for (const line of frame.lines) {
+     const path = line.map(([lat, lng]) => new core!.LatLng(lat, lng, true))
+     for (const [strokeColor, strokeWeight] of [['#fffdf7', 8], ['#425c39', 5]] as const) paths.push(new maps.Polyline({ map, path, strokeColor, strokeWeight, strokeOpacity: 1, clickable: false }))
+    }
+    map.data.forEach(feature => { if (feature.getProperty('kind') === 'cursor') map.data.remove(feature) })
+    if (playing && frame.cursor) map.data.addGeoJson({ type: 'Feature', properties: { kind: 'cursor' }, geometry: { type: 'Point', coordinates: [frame.cursor[1], frame.cursor[0]] } })
+   }
+   draw.current(latest.current); renderFrame.current(latestFrame.current.frame, latestFrame.current.playing); setReady(true)
    core.event.addListenerOnce(map, 'tilesloaded', () => { if (!disposed) { window.clearTimeout(timeout); setLoading(false) } })
    fitRoute()
    resize = new ResizeObserver(() => core!.event.trigger(map, 'resize'))
@@ -90,7 +100,7 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
    disposed = true; window.clearTimeout(timeout); window.removeEventListener(GOOGLE_MAP_ERROR, fail); resize?.disconnect()
    paths.forEach(path => path.setMap(null))
    if (instance && core) { core.event.clearInstanceListeners(instance); instance.data.setMap(null) }
-   fit.current = () => {}; draw.current = () => {}
+   fit.current = () => {}; draw.current = () => {}; renderFrame.current = () => {}
    element.replaceChildren()
   }
  }, [visible, hasPoints, retry])
@@ -99,7 +109,7 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
   <div ref={host} className="walk-map-canvas" role="region" aria-label="Google Maps walking route. Pinch with two fingers to zoom. Normal scrolling leaves the map unchanged."/>
   {visible && loading && <p className="walk-map-status" role="status">Loading Google Maps…</p>}
   {error && <p className="walk-map-status" role="alert">{error} <Button className="secondary" onClick={() => setRetry(value => value + 1)}>Retry map</Button></p>}
-  <div className="walk-map-tools"><span><span className="walk-route-start"/> Start <span className="walk-route-finish"/> Finish</span><div><Button className="secondary" onClick={() => fit.current()}>Fit route</Button></div></div>
-  <figcaption>Pinch with two fingers to zoom. Scroll normally to move down the page. GPS gaps stay open. <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Map privacy</a></figcaption>
+  <RouteMapControls playing={replay.playing} disabled={!ready || !replay.canReplay} status={replay.status} onFit={() => fit.current()} onReplay={() => { if (!replay.playing) fit.current(); replay.toggle() }}/>
+
  </figure>
 }

@@ -298,3 +298,51 @@ build pass on Node 26.13.0 (Node 22.x CI remains required). Browser checks confi
 km formatting, no World/demo labels, canonical URLs, the legacy local redirect and
 normal-scroll camera stability. No production release, hosted migration or data
 change was performed; commit/push status is reported in the handoff.
+
+## Vector maps and route reproduction (12 November 2026)
+
+The supplied light-map screenshots now guide a vector basemap instead of a colour
+filter over raster street images. MapLibre GL JS 6.18.0 loads a locally stored,
+customized OpenFreeMap Positron style and worldwide public vector tiles/fonts.
+White roads, pale-green parks, subtle buildings, north and a metric scale match
+the reference's visual hierarchy. Credits remain visible but are outside the
+vector image, below its controls. A Leaflet raster fallback remains for vector
+initialization failure; an optional configured Google provider remains supported.
+Neither Apple nor Google imagery is copied. OpenFreeMap requires no account/key.
+Provider availability and WebGL performance on real phones still need validation.
+The lazy vector renderer/worker add sizeable separate chunks to the build.
+
+Reproduce route appears next to Start/Finish on each map, with Stop replay while
+playing. Playback takes approximately 12 seconds, draws by recorded distance and
+shows a moving cursor. It never joins missing GPS segments. Starting playback fits
+the route once; it does not repeatedly pan the camera. Stop, completion, point-set
+changes and unmount clean up animation work. Reduced-motion users receive the full
+route without animation. GeoJSON worker updates are coalesced so map rendering can
+keep pace with animation. No database/RPC/statistics changes are part of playback.
+
+The visible Pinch/scroll instructions, calendar-period prose, repeated location
+footer/detail heading and GPS-calculation help paragraph were removed as requested.
+Date and metrics remain. The shared icon tile's inherited bottom margin was the
+header misalignment cause; feature-scoped CSS resets it and vertically centres the
+complete date/title group against the footsteps tile.
+
+Tests cover playback start/mid/end geometry, distance-based interpolation, gaps,
+antimeridian, invalid progress, empty/single-point routes and fixture/statistics
+immutability. Browser checks confirmed an intermediate green trail/cursor and the
+Stop replay reset. Licensing notices and upstream credits are retained at
+`public/licenses/walk-map-style.txt`. No hosted data or migrations were changed.
+
+References: https://openfreemap.org/quick_start/ and
+https://github.com/hyperknot/openfreemap-styles.
+
+Final verification for vector maps/playback: 143 isolated tests, TypeScript and
+production build pass on the available Node 26.13.0 runtime (Node 22.x CI remains
+required). Browser evidence covers an intermediate moving cursor/partial green
+trail, Stop replay restoration, automatic completion, unchanged 3-walk/8.32-km/
+1h-59m presentation totals, credits outside the image and header centre offset of
+0 px between the footsteps tile and date/title block. MapLibre 6.18.0 was chosen
+after the earlier major version triggered an npm advisory; installation/audit for
+the selected version reports zero vulnerabilities. Existing Zod and bundle-size
+build warnings remain; the vector renderer/worker are lazy chunks. Physical phone
+GPS/pinch, Google provider live verification and production deployment remain
+outside this local evidence.
