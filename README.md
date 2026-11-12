@@ -178,7 +178,13 @@ Confirming the end in Walks opens the completed route after it is saved; offline
 completion displays a pending-sync notice. NFC on the leash opens the start
 confirmation, while the phone carried by the walker supplies GPS positions.
 
-The route map currently shows the GPS path without street tiles. Stationary
+Route maps use worldwide OpenStreetMap street tiles with an interactive dark-green
+GPS trace, zoom, dragging, Fit route and World controls. The view follows each
+walk's saved coordinates; no city is hardcoded. History/detail cards show metres,
+duration and average speed. Street maps require internet and disclose the viewed
+area/IP to the tile provider. Three clearly labelled fictional classroom walks in
+Benfica, Expo and Alvalade appear separately from household data and statistics;
+see [demo provenance](docs/walks-demo.md). No new migration is required. Stationary
 automatic ending is optional and works only with uninterrupted foreground GPS.
 Shared mobile notifications and Academy progress await the corresponding team
 interfaces. Background/screen-locked tracking has not been verified on phones.

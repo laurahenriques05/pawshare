@@ -140,10 +140,33 @@ background GPS or guaranteed screen-locked notification delivery in this change.
 
 ## Maps, NFC and Academy coordination
 
-The built-in SVG route map uses a local geographic projection with north, start,
-finish and an approximate scale. No coordinate is sent to any third-party map
-service and there are no keys, tile requests or map charges. Street basemap,
-zooming and map-provider selection remain a team integration decision.
+Route maps now use Leaflet 1.9.4 and OpenStreetMap street tiles worldwide.
+The viewport is derived from each walk's coordinates, with no Lisbon boundary.
+Users can drag, pinch/zoom, fit the route or choose World. Longitude unwrapping
+keeps antimeridian crossings local. Like standard Web Mercator maps, the basemap
+ends near ±85.05° latitude; stored GPS coordinates are not truncated. Detail and
+history cards show distance in metres, duration and average speed, including stops.
+GPS gaps remain disconnected. Existing recorder-only active-route RLS is unchanged.
+
+Street tiles load only when the map enters the viewport. Requests use HTTPS,
+normal browser caching, visible attribution and an origin-only Referer (per-image
+policy, without changing the application's no-referrer header for invitations).
+Only the visible area is requested: no offline tile downloads or prefetching.
+The external provider receives IP and viewed tile areas; this is disclosed beneath
+each map. Exact GPS points stay in the browser/Supabase and are not submitted to a
+routing service. Internet and provider availability are needed for street imagery;
+a tile failure leaves the recorded trace visible with a retry action. OSM's public
+service has no SLA; reassess a managed tile provider before large-scale rollout.
+See https://operations.osmfoundation.org/policies/tiles/.
+
+Three classroom examples (Benfica, Expo and Alvalade) are visible under Walks,
+clearly marked as fictional. They use the same interactive map and statistics
+components as real walks, with a hide/show control and individual detail URLs
+`/walks/demo-benfica`, `/walks/demo-expo`, `/walks/demo-alvalade`. They never call
+write RPCs, receive household identities or enter family summaries, Home cards,
+reminders or real history. They can be displayed even when the walk database is
+unavailable, after normal authentication and household onboarding. No migration
+or hosted data mutation is needed. See [demo provenance](walks-demo.md).
 
 Proposed NFC convention: `/<feature>?action=<action>`, currently
 `/walks?action=start`. Laura should use/confirm the common convention for Feed.
@@ -169,8 +192,8 @@ Zod annotation warnings.
 
 Visual verification uses isolated sample fixtures, not real Supabase records:
 desktop and 390px mobile, active walk, completed details/map, edit fields, NFC
-confirmation, keyboard Escape and focus return. No sample fixture is included in
-the production app. This does not replace the following live checks:
+confirmation, keyboard Escape and focus return. The three explicitly labelled classroom fixtures are included in the app;
+they are separate from production household data. This does not replace the following live checks:
 
 1. Owner A starts, retries Start, records outdoors, refreshes and explicitly resumes.
 2. Member B sees active status but no coordinates via UI and direct API. B cannot
@@ -196,3 +219,13 @@ the production app. This does not replace the following live checks:
 Browser API references used for implementation:
 [Geolocation watchPosition](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition)
 and [Notifications API](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API).
+
+## Worldwide maps update validation (12 November 2026)
+
+125 isolated tests pass, including synthetic routes in New York, Sydney and Tokyo,
+antimeridian crossings in both directions, invalid/polar/empty coordinates, GPS
+gaps and all three demo fixtures. Existing SQL security tests remain unchanged.
+Typecheck/build checks use the available Node 26.13.0 runtime, not the requested
+Node 22.x; CI/team verification under Node 22.x remains needed. Browser checks
+cover the sample detail routes and map controls; they do not prove outdoor GPS,
+physical NFC, screen-locked tracking or worldwide map detail quality.
