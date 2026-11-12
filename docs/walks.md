@@ -167,7 +167,7 @@ See https://operations.osmfoundation.org/policies/tiles/.
 Three classroom examples (Benfica, Expo and Alvalade) are visible under Walks,
 clearly marked as fictional. They use the same interactive map and statistics
 components as real walks, with an include/exclude control and individual detail URLs
-`/walks/demo-benfica`, `/walks/demo-expo`, `/walks/demo-alvalade`. They never call
+`/walks/walk-benfica`, `/walks/walk-expo`, `/walks/walk-alvalade`. They never call
 write RPCs or receive household identities. They appear in Past adventures,
 interleaved chronologically with saved walks. In explicit Demonstration mode they
 also contribute to the displayed Walks totals for the selected calendar period.
@@ -254,3 +254,47 @@ loader, roadmap tiles with no imitation styling, dark-green polylines, and
 gestureHandling=greedy. No Google requests happen without the configured key.
 Live Google visual/auth/billing checks and physical touch gestures remain pending.
 No hosted database, account security, billing or deployment configuration changed.
+
+## Apple Maps-inspired presentation update (12 November 2026)
+
+This update supersedes the demo-mode controls and wheel/World behaviour described
+above. The Mac Maps app was opened, but its tile canvas was blank during native
+inspection; Apple Maps on the web supplied the visible cartographic reference.
+No Apple Maps SDK, token or hosted service was configured. The working basemap
+keeps its licensed provider, with subdued raster colours and quieter controls
+inspired by Apple Maps. Required attribution stays visible; verbose supplier and
+configuration messages were removed from map captions. The World button is gone
+from both provider components; coverage still follows arbitrary GPS coordinates.
+
+Accumulated and individual displayed distances now use kilometres to two decimal
+places. Internal distances and SQL remain in metres. The three local presentation
+walks appear in Past adventures, contributing to this month's total of 8.32 km,
+3 walks and 1h 59m. At the user's explicit request the presentation has no fictional
+or demo labels. Those unlabelled fixtures and their detail pages are now gated by
+Vite's development flag: production shows only saved walks. They were not inserted
+into the database and do not change Home's real household statistics. The former
+Include sample history control/session preference is no longer used.
+
+Canonical presentation URLs are `/walks/walk-benfica`, `/walks/walk-expo` and
+`/walks/walk-alvalade`; earlier demo-prefixed URLs redirect locally. No shared
+router/schema contract changed.
+
+Normal mouse-wheel or two-finger scrolling passes to the page without changing the
+map. Trackpad pinch is identified by the browser Ctrl+wheel signal and handled
+inside the map. Touch pinch is enabled; one-finger map dragging is disabled for
+coarse-pointer devices so normal page scrolling is available. Double-click zoom
+is disabled; keyboard/+/- controls and Fit route remain as deliberate accessible
+actions. Google, if configured later, uses cooperative gesture handling. Map
+updates draw new points without repeatedly fitting the camera.
+
+Browser evidence: ordinary wheel scrolling over the sample map moved page scroll
+from 276 to 0 while its scale stayed at 300 m. Physical touch/trackpad pinch still
+needs device testing. Gesture tests cover ordinary scrolling, Ctrl+wheel pinch in
+both directions, small-event accumulation, reversal and line units; distance tests
+cover km formatting. The fixture gate is tested with development on/off.
+
+Local verification for this update: 138 isolated tests, TypeScript and production
+build pass on Node 26.13.0 (Node 22.x CI remains required). Browser checks confirmed
+km formatting, no World/demo labels, canonical URLs, the legacy local redirect and
+normal-scroll camera stability. No production release, hosted migration or data
+change was performed; commit/push status is reported in the handoff.

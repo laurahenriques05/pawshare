@@ -3,13 +3,13 @@ import type { Map as LeafletMap } from 'leaflet'
 import { Button } from '../../components/ui'
 import { type Point } from './gps'
 import { mapCoordinates, mapSegments } from './mapGeometry'
+import { createPinchZoomHandler } from './mapGestures'
 import 'leaflet/dist/leaflet.css'
 import './walks.css'
 
 /** Coordinates stay in the browser; only visible map tile areas go to OSM. */
 export function OpenStreetRouteMap({ points, compact = false }: { points: Point[]; compact?: boolean }) {
  const host = useRef<HTMLDivElement>(null)
- const map = useRef<LeafletMap | null>(null)
  const fit = useRef<() => void>(() => {})
  const draw = useRef<(points: Point[]) => void>(() => {})
  const latest = useRef(points)
@@ -32,13 +32,22 @@ export function OpenStreetRouteMap({ points, compact = false }: { points: Point[
   let disposed = false
   let instance: LeafletMap | undefined
   let resize: ResizeObserver | undefined
+  let removeWheel: (()=>void) | undefined
   setLoading(true); setError('')
   void import('leaflet').then(L => {
    if (disposed || !host.current) return
    const coordinates = mapCoordinates(latest.current)
    if (!coordinates.length) { setLoading(false); return }
-   instance = L.map(host.current, { scrollWheelZoom: true, touchZoom: true, doubleClickZoom: true, worldCopyJump: true, maxZoom: 19, minZoom: 0 })
-   map.current = instance
+   instance = L.map(host.current, { scrollWheelZoom: false, touchZoom: true, doubleClickZoom: false, dragging: !window.matchMedia('(pointer: coarse)').matches, zoomSnap: .25, zoomDelta: .5, worldCopyJump: true, maxZoom: 19, minZoom: 0 })
+   instance.attributionControl.setPrefix(false)
+   const canvas = host.current
+   const onWheel = createPinchZoomHandler((delta, event) => {
+    if (!instance) return
+    const zoom = Math.max(instance.getMinZoom(), Math.min(instance.getMaxZoom(), instance.getZoom() + delta))
+    instance.setZoomAround(instance.mouseEventToContainerPoint(event), zoom, { animate: false })
+   })
+   canvas.addEventListener('wheel', onWheel, { passive: false })
+   removeWheel = () => canvas.removeEventListener('wheel', onWheel)
    let bounds = L.latLngBounds(coordinates)
    const fitRoute = () => instance?.fitBounds(bounds, { padding: [35, 35], maxZoom: 17, animate: false })
    fit.current = fitRoute
@@ -68,14 +77,14 @@ export function OpenStreetRouteMap({ points, compact = false }: { points: Point[
    resize = new ResizeObserver(() => instance?.invalidateSize({ animate: false }))
    resize.observe(host.current)
   }).catch(() => { if (!disposed) { setLoading(false); setError('The map could not load. Check your connection and retry.') } })
-  return () => { disposed = true; resize?.disconnect(); instance?.remove(); map.current = null; fit.current = () => {}; draw.current = () => {} }
+  return () => { disposed = true; resize?.disconnect(); removeWheel?.(); instance?.remove(); fit.current = () => {}; draw.current = () => {} }
  }, [visible, retry])
  if (!valid.length) return <p className="walk-empty">No GPS route recorded. Time-only walks are still included in summaries.</p>
  return <figure className={`walk-route-map${compact ? ' compact' : ''}`}>
-  <div ref={host} className="walk-map-canvas" role="region" aria-label="Interactive walking route map. Use arrow keys to pan and plus or minus to zoom."/>
+  <div ref={host} className="walk-map-canvas" role="region" aria-label="Interactive walking route map. Pinch with two fingers to zoom. Normal scrolling leaves the map unchanged. Keyboard and zoom buttons are available."/>
   {visible && loading && <p className="walk-map-status" role="status">Loading street map…</p>}
   {error && <p className="walk-map-status" role="alert">{error} <Button className="secondary" onClick={() => setRetry(n => n + 1)}>Retry map</Button></p>}
-  <div className="walk-map-tools"><span><span className="walk-route-start"/> Start <span className="walk-route-finish"/> Finish</span><div><Button className="secondary" onClick={() => fit.current()}>Fit route</Button><Button className="secondary" onClick={() => map.current?.fitWorld()}>World</Button></div></div>
-  <figcaption>OpenStreetMap preview · Google Maps is not configured yet. Drag, pinch or use the mouse wheel to explore. GPS gaps stay open. Street maps need internet; OpenStreetMap receives the area viewed and your IP address. <a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noreferrer">Map privacy</a></figcaption>
+  <div className="walk-map-tools"><span><span className="walk-route-start"/> Start <span className="walk-route-finish"/> Finish</span><div><Button className="secondary" onClick={() => fit.current()}>Fit route</Button></div></div>
+  <figcaption>Pinch with two fingers to zoom. Scroll normally to move down the page. GPS gaps stay open. <a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noreferrer">Map privacy</a></figcaption>
  </figure>
 }

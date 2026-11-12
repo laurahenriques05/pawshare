@@ -180,15 +180,22 @@ confirmation, while the phone carried by the walker supplies GPS positions.
 
 Route maps use official Google Maps when the optional public browser key is
 configured; without it they show an explicitly labelled OpenStreetMap preview.
-Both offer worldwide coverage, a dark-green GPS trace, mouse-wheel/pinch zoom,
-dragging, Fit route and World controls. See [Google Maps setup](docs/walks-google-maps.md). The view follows each
-walk's saved coordinates; no city is hardcoded. History/detail cards show metres,
+Both offer worldwide coverage, a dark-green GPS trace, deliberate trackpad/touch pinch zoom,
+dragging and Fit route controls. Ordinary wheel scrolling leaves maps unchanged. See [Google Maps setup](docs/walks-google-maps.md). The view follows each
+walk's saved coordinates; no city is hardcoded. History/detail cards and accumulated distance use kilometres, alongside
 duration and average speed. Street maps require internet and share viewed-area/device information with the
-selected map provider. Three clearly labelled fictional classroom walks in
-Benfica, Expo and Alvalade appear in Past adventures and contribute to the displayed
-Walks totals while Demonstration mode is on. “Include sample history” switches both
-the sample history and its contributions off; real saved data and Home stay intact;
+selected map provider. The local development app includes three presentation walks in Past adventures
+(Benfica, Expo and Alvalade), with no demonstration badges, contributing to local
+Walks totals. These records and their detail pages are excluded from production;
+real saved household data and Home remain intact;
 see [demo provenance](docs/walks-demo.md). No new migration is required. Stationary
 automatic ending is optional and works only with uninterrupted foreground GPS.
 Shared mobile notifications and Academy progress await the corresponding team
 interfaces. Background/screen-locked tracking has not been verified on phones.
+
+The current local map presentation uses a muted palette inspired by Apple Maps;
+it is not Apple cartography. Explanatory provider banners and the World button
+are removed; the required cartographic attribution remains visible in the map
+corner. Two-finger trackpad pinch (Ctrl+wheel browser signal), touch pinch and
+explicit zoom controls are supported; ordinary scroll and double-click do not
+zoom. Actual touch-device behaviour still requires validation.

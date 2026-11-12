@@ -1,15 +1,23 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Walk } from '../lib/supabase/database.types'
 import { demoWalks } from '../features/walks/demo'
-import { summarizeHistory, walkHistory } from '../features/walks/history'
+import { summarizeHistory, walkHistory, presentationHistoryEnabled } from '../features/walks/history'
 const now = new Date('2026-11-12T12:00:00Z')
 const saved = (id: string, ended = true, deleted = false): Walk => ({ id, household_id: 'h', dog_id: 'd', walker_id: 'u', started_at: '2026-11-11T12:00:00Z', ended_at: ended ? '2026-11-11T12:10:00Z' : null, distance_m: 700, notes: '', end_reason: ended ? 'manual' : null, deleted_at: deleted ? '2026-11-11T13:00:00Z' : null })
+afterEach(()=>vi.unstubAllEnvs())
 describe('Past adventures and displayed totals', () => {
+ it('shows unlabelled presentation history only during local development',()=>{
+  vi.stubEnv('DEV',false)
+  expect(presentationHistoryEnabled()).toBe(false)
+  expect(walkHistory([saved('real')],presentationHistoryEnabled(),'u').map(w=>w.id)).toEqual(['real'])
+  vi.stubEnv('DEV',true)
+  expect(walkHistory([],presentationHistoryEnabled(),'u')).toHaveLength(3)
+ })
  it('includes all three samples in monthly demo totals and keeps source data untouched', () => {
   const source = [saved('real'), saved('active', false), saved('deleted', true, true)]
   const before = structuredClone(source)
   const history = walkHistory(source, true, 'u')
-  expect(history.map(entry=>entry.id)).toEqual(['real','demo-alvalade','demo-expo','demo-benfica'])
+  expect(history.map(entry=>entry.id)).toEqual(['real','walk-alvalade','walk-expo','walk-benfica'])
   expect(history.filter(entry=>entry.demo)).toHaveLength(3)
   const totals = summarizeHistory(history,'month','Europe/Lisbon',now)
   expect(totals.count).toBe(4)

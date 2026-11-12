@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import { Button, Field, Notice, PageTitle, errorMessage } from '../../components/ui'
 import { db } from '../../lib/supabase/client'
 import type { Walk, WalkPoint } from '../../lib/supabase/database.types'
@@ -10,13 +10,15 @@ import { duration } from './gps'
 import { RouteMap } from './RouteMap'
 import { useWalks } from './WalkProvider'
 import { findDemoWalk } from './demo'
+import { presentationHistoryEnabled } from './history'
 import { DemoWalkDetail } from './DemoWalks'
 import { WalkStats } from './WalkActivityCard'
 function localInput(iso:string){const date=new Date(iso);return new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,23)}
 export function WalkDetailPage(){
  const {walkId}=useParams()
  useEffect(()=>{window.scrollTo(0,0)},[walkId])
- const demo=findDemoWalk(walkId)
+ const demo=presentationHistoryEnabled()?findDemoWalk(walkId):undefined
+ if(demo&&walkId!==demo.id)return <Navigate to={`/walks/${demo.id}`} replace/>
  return demo?<DemoWalkDetail key={demo.id} walk={demo}/>:<SavedWalkDetailPage/>
 }
 function SavedWalkDetailPage(){

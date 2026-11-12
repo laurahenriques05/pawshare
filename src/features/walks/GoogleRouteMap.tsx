@@ -10,7 +10,6 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
  const latest = useRef(points)
  const draw = useRef<(points: Point[]) => void>(() => {})
  const fit = useRef<() => void>(() => {})
- const world = useRef<() => void>(() => {})
  const [visible, setVisible] = useState(false)
  const [loading, setLoading] = useState(true)
  const [error, setError] = useState('')
@@ -42,7 +41,7 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
    const maps = libraries.maps; core = libraries.core
    instance = new maps.Map(host.current, {
     center: { lat: 0, lng: 0 }, zoom: 2, minZoom: 0, maxZoom: 21,
-    mapTypeId: 'roadmap', gestureHandling: 'greedy', scrollwheel: true,
+    mapTypeId: 'roadmap', gestureHandling: 'cooperative', disableDoubleClickZoom: true,
     zoomControl: true, mapTypeControl: false, streetViewControl: false,
     fullscreenControl: true, keyboardShortcuts: true,
    })
@@ -53,7 +52,6 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
     core!.event.addListenerOnce(map, 'idle', () => { if ((map.getZoom() || 0) > 17) map.setZoom(17) })
    }
    fit.current = fitRoute
-   world.current = () => { map.setCenter({ lat: 0, lng: 0 }); map.setZoom(0) }
    map.data.setStyle(feature => ({
     icon: { path: core!.SymbolPath.CIRCLE, scale: feature.getProperty('kind') === 'start' ? 6 : 5,
      fillColor: feature.getProperty('kind') === 'start' ? '#fffdf7' : '#425c39', fillOpacity: 1,
@@ -92,16 +90,16 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
    disposed = true; window.clearTimeout(timeout); window.removeEventListener(GOOGLE_MAP_ERROR, fail); resize?.disconnect()
    paths.forEach(path => path.setMap(null))
    if (instance && core) { core.event.clearInstanceListeners(instance); instance.data.setMap(null) }
-   fit.current = () => {}; world.current = () => {}; draw.current = () => {}
+   fit.current = () => {}; draw.current = () => {}
    element.replaceChildren()
   }
  }, [visible, hasPoints, retry])
  if (!hasPoints) return <p className="walk-empty">No GPS route recorded. Time-only walks are still included in summaries.</p>
  return <figure className={`walk-route-map${compact ? ' compact' : ''}`}>
-  <div ref={host} className="walk-map-canvas" role="region" aria-label="Google Maps walking route. Drag to pan, pinch or use the mouse wheel to zoom."/>
+  <div ref={host} className="walk-map-canvas" role="region" aria-label="Google Maps walking route. Pinch with two fingers to zoom. Normal scrolling leaves the map unchanged."/>
   {visible && loading && <p className="walk-map-status" role="status">Loading Google Maps…</p>}
   {error && <p className="walk-map-status" role="alert">{error} <Button className="secondary" onClick={() => setRetry(value => value + 1)}>Retry map</Button></p>}
-  <div className="walk-map-tools"><span><span className="walk-route-start"/> Start <span className="walk-route-finish"/> Finish</span><div><Button className="secondary" onClick={() => fit.current()}>Fit route</Button><Button className="secondary" onClick={() => world.current()}>World</Button></div></div>
-  <figcaption>Google Maps · Drag to explore. Pinch or use the mouse wheel to zoom. GPS gaps stay open. Google receives the viewed area, route overlay and device/network information. <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Map privacy</a></figcaption>
+  <div className="walk-map-tools"><span><span className="walk-route-start"/> Start <span className="walk-route-finish"/> Finish</span><div><Button className="secondary" onClick={() => fit.current()}>Fit route</Button></div></div>
+  <figcaption>Pinch with two fingers to zoom. Scroll normally to move down the page. GPS gaps stay open. <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Map privacy</a></figcaption>
  </figure>
 }

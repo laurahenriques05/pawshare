@@ -35,8 +35,9 @@ describe('worldwide route geometry', () => {
 })
 describe('classroom-only walk fixtures', () => {
  it('has exactly three explicit demo IDs and no real database identifiers', () => {
-  expect(demoWalks.map(walk=>walk.id)).toEqual(['demo-benfica','demo-expo','demo-alvalade'])
+  expect(demoWalks.map(walk=>walk.id)).toEqual(['walk-benfica','walk-expo','walk-alvalade'])
   expect(findDemoWalk('not-a-demo')).toBeUndefined()
+  expect(findDemoWalk('demo-benfica')?.id).toBe('walk-benfica')
   expect(findDemoWalk(undefined)).toBeUndefined()
   for (const walk of demoWalks) {
    expect(walk).not.toHaveProperty('household_id')

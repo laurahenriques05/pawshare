@@ -3,6 +3,8 @@ import { demoWalks } from './demo'
 import { duration, localDay, periodStart, type Point } from './gps'
 export type HistoryEntry = { id: string; title: string; startedAt: string; meters: number; seconds: number; demo: boolean; points?: Point[]; location?: string }
 
+export const presentationHistoryEnabled = () => import.meta.env.DEV
+
 /** View-only demo history; never modifies household records or Home statistics. */
 export function walkHistory(walks: Walk[], includeExamples: boolean, user: string): HistoryEntry[] {
  const saved: HistoryEntry[] = walks.filter(walk => walk.ended_at && !walk.deleted_at).map(walk => ({

@@ -37,7 +37,7 @@ unit tests mock the API and make no real requests or billable calls.
    team's configuration owner and rebuild after member review. No deployment
    environment has been changed here.
 5. Validate each example, worldwide panning, mouse wheel, physical two-finger
-   pinch, Fit route/World, key/domain rejection, network failure and retry. Then
+   pinch, Fit route, key/domain rejection, network failure and retry. Then
    verify a disposable real GPS walk with informed users. Google's SDK receives
    map/overlay coordinates and device/network information; the map caption links
    its privacy policy. Active route sharing with family is still forbidden by RLS.
@@ -65,3 +65,12 @@ build warnings remain. Browser checks confirmed mode on/off (3 vs 0 fixture walk
 8,320 m / 1h 59m monthly demo totals, Past adventures placement and mouse-wheel zoom
 on the explicitly labelled OSM preview. No live Google or physical-pinch validation
 has been performed without the configuration/device prerequisites.
+
+## Superseding presentation settings
+
+The user has since chosen Apple Maps as the visual inspiration. No claim is made
+that either provider is Apple cartography. Both implementations remove World and
+the explanatory supplier banners. Google, if configured, now uses cooperative
+gestures and disables double-click zoom; ordinary scrolling does not zoom. The
+local classroom fixtures are unlabelled as requested and excluded from production.
+Distances in cards and cumulative totals use km.

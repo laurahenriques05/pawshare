@@ -9,7 +9,8 @@ import { duration, paceLabel, routeDistance, timeLabel } from './gps'
 import { RouteMap } from './RouteMap'
 import { walkNotifications } from './notifications'
 import { clearWalkStart, pendingWalkStart } from './nfc'
-import { walkHistory, summarizeHistory } from './history'
+import { walkHistory, summarizeHistory, presentationHistoryEnabled } from './history'
+import { kilometersLabel } from './mapGestures'
 import { WalkActivityCard } from './WalkActivityCard'
 
 export function WalksPage() {
@@ -19,9 +20,7 @@ export function WalksPage() {
  const [finishingWalk,setFinishingWalk]=useState<string|null>(null)
  const active=data.walks.find(w=>!w.ended_at&&!w.deleted_at),mine=active?.walker_id===session!.user.id
  const [historyLimit,setHistoryLimit]=useState(20)
- const [includeExamples,setIncludeExamples]=useState(()=>{try{return sessionStorage.getItem('pawshare.walk-demo-history')!=='off'}catch{return true}})
- function toggleExamples(value:boolean){setIncludeExamples(value);try{sessionStorage.setItem('pawshare.walk-demo-history',value?'on':'off')}catch{/* This display preference can remain in memory. */}}
- const history=walkHistory(data.walks,includeExamples,session!.user.id)
+ const history=walkHistory(data.walks,presentationHistoryEnabled(),session!.user.id)
  const summary=summarizeHistory(history,period,household!.timezone)
  const deleted=data.walks.filter(w=>w.deleted_at&&w.walker_id===session!.user.id)
  const meters=mine?routeDistance(data.points):0
@@ -64,8 +63,8 @@ export function WalksPage() {
      </>}
     </>:<><p>Confirm the start, allow location access, and carry your phone with you to record the route. Your family sees it after you finish.</p><Button disabled={data.busy} onClick={()=>setConfirm('start')}>Start walk</Button></>}
    </section>
-   <section className="card"><div className="walk-heading"><div><p className="eyebrow">LITTLE STEPS ADD UP</p><h2>Walking together</h2>{includeExamples&&<span className="walk-demo-label">Demonstration mode</span>}</div><select aria-label="Summary period" value={period} onChange={e=>setPeriod(e.target.value as typeof period)}><option value="day">Today</option><option value="week">This week</option><option value="month">This month</option></select></div><div className="walk-metrics"><div><strong>{summary.count}</strong><span>Completed walks</span></div><div><strong>{Math.round(summary.meters).toLocaleString()} m</strong><span>Recorded distance</span></div><div><strong>{timeLabel(summary.seconds)}</strong><span>Total time</span></div></div>{includeExamples&&<p className="walk-demo-summary">Includes the fictional sample history in the selected period. Turn off “Include sample history” below to see only your household’s saved walks.</p>}<p className="muted">Calendar periods use {household!.timezone}; weeks start on Monday. A walk belongs to the day it started. No daily target has been set.</p></section>
-   <section className="card"><div className="walk-heading"><h2>Past adventures</h2><label className="walk-check walk-demo-mode"><input type="checkbox" checked={includeExamples} onChange={e=>toggleExamples(e.target.checked)}/>Include sample history</label></div>{includeExamples&&<p className="muted">Benfica, Expo and Alvalade are fictional past walks for the classroom presentation. They count towards the displayed Walks totals in demonstration mode and are not saved to your household.</p>}{!history.length?<p className="walk-empty">Your first completed walk will appear here.</p>:<div className="walk-activity-list">{history.slice(0,historyLimit).map(w=><WalkActivityCard key={w.id} {...w} loadRoute={!w.demo}/>)}</div>}{history.length>historyLimit&&<Button className="secondary" onClick={()=>setHistoryLimit(n=>n+20)}>Show more walks</Button>}</section>
+   <section className="card"><div className="walk-heading"><div><p className="eyebrow">LITTLE STEPS ADD UP</p><h2>Walking together</h2></div><select aria-label="Summary period" value={period} onChange={e=>setPeriod(e.target.value as typeof period)}><option value="day">Today</option><option value="week">This week</option><option value="month">This month</option></select></div><div className="walk-metrics"><div><strong>{summary.count}</strong><span>Completed walks</span></div><div><strong>{kilometersLabel(summary.meters)} km</strong><span>Recorded distance</span></div><div><strong>{timeLabel(summary.seconds)}</strong><span>Total time</span></div></div><p className="muted">Calendar periods use {household!.timezone}; weeks start on Monday. A walk belongs to the day it started. No daily target has been set.</p></section>
+   <section className="card"><div className="walk-heading"><h2>Past adventures</h2></div>{!history.length?<p className="walk-empty">Your first completed walk will appear here.</p>:<div className="walk-activity-list">{history.slice(0,historyLimit).map(w=><WalkActivityCard key={w.id} {...w} loadRoute={!w.demo}/>)}</div>}{history.length>historyLimit&&<Button className="secondary" onClick={()=>setHistoryLimit(n=>n+20)}>Show more walks</Button>}</section>
    {deleted.length>0&&<section className="card"><h2>Recently deleted by you</h2><p>These walks are excluded from family history and summaries. Open one to restore it.</p><ul>{deleted.map(w=><li key={w.id}><Link to={`/walks/${w.id}`}>{new Date(w.started_at).toLocaleString()}</Link></li>)}</ul></section>}
   </>}
   <section className="card"><h2>A shortcut on the leash</h2><p>Tap the NFC tag on the leash to open PawShare. Your phone records the GPS route while you carry it on the walk. Configure the tag once with this link. It opens the Start Walk confirmation for the signed-in user’s selected family. Opening a link never starts a walk automatically.</p><code className="walk-url">{window.location.origin}/walks?action=start</code><p><Button className="secondary" onClick={async()=>{try{await navigator.clipboard.writeText(`${window.location.origin}/walks?action=start`);setCopied('Link copied.')}catch{setCopied('Copy the link shown above manually.')}}}>Copy NFC link</Button></p>{copied&&<p role="status">{copied}</p>}<Link to="/walks/gps-test">Open GPS diagnostics</Link> · <Link to="/walks/learn">Read the walking lesson</Link></section>

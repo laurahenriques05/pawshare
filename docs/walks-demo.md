@@ -1,45 +1,52 @@
-# Classroom walk examples
+# Local presentation history
 
-Walks contains three deliberately fictional records for the classroom presentation:
-Benfica (8 November 2026), Expo / Parque das Nações (9 November) and Alvalade
-(10 November). They are stored locally in `src/features/walks/demoRoutes.json`,
-with IDs prefixed `demo-`. Synthetic points are generated every approximately
-12 metres along public street/path geometry, assigned ten-second timestamps
-and 3-metre synthetic accuracy. These are illustrations, not observed walks,
-live device fixes or recommendations for pedestrian access.
+The local Vite development app includes three presentation records in Past
+adventures: Benfica (8 November 2026), Expo / Parque das Nações (9 November) and
+Alvalade (10 November). Their IDs are `walk-benfica`, `walk-expo` and
+`walk-alvalade`. Legacy demo-prefixed detail URLs redirect to the canonical URLs.
 
-`demo.ts` derives time and distance from the fixture points using the same GPS
-calculation as the real feature. No household/user IDs are assigned and no sample
-is inserted into Supabase. The samples contribute only to the explicitly labelled demonstration-mode Walks
-totals. They never change real household statistics, Home summaries or notifications. They have read-only detail pages via the existing
-`/walks/:walkId` route. “Include sample history” controls both their presence in Past adventures and their inclusion in displayed Walks totals; the choice lasts for the browser tab session.
-Real start/finish actions continue to require authentication, household membership,
-recorder ownership and normal GPS permission. Route maps never substitute a sample
-when a real walk fails or has no coordinates.
+These are synthetic classroom fixtures, not observed walks or real device fixes.
+At the user's explicit request their cards/detail pages have no fictional or demo
+labels. To prevent unlabelled sample history reaching real households, both the
+fixture entries and their detail-page lookup are gated by `import.meta.env.DEV`.
+A production build shows only real saved household walks. No example is inserted
+into Supabase, assigned a household/user ID or included in Home's real statistics.
+
+In local development they contribute to the selected-period Walks totals and are
+interleaved with saved walks by start date. This month contains 3 presentation
+walks, 8.32 km and 1h 59m (7,150 seconds before time formatting). Internal distance
+calculations remain in metres; displayed distances use km with two decimals. There
+is no presentation-mode switch or session preference in the current UI.
 
 ## Geometry provenance and licence
 
-Public OpenStreetMap API geometry was retrieved on 12 November 2026. The illustrative
-paths were assembled offline from connected public street/path ways, then sampled
-and simplified; no remote route-planning API is involved. Only coordinate arrays
-are shipped, with no OSM contributor account metadata.
+Coordinate arrays live in `src/features/walks/demoRoutes.json`. Synthetic fixes
+were generated approximately every 12 metres along public OpenStreetMap street
+and path geometry, assigned ten-second timestamps and 3-metre synthetic accuracy.
+`demo.ts` derives their distance/time using the same GPS calculation as the real
+feature. These routes illustrate the UI, not recommendations for pedestrian access.
 
-- Benfica source: https://www.openstreetmap.org/api/0.6/map?bbox=-9.211,38.744,-9.193,38.756
-- Expo source: https://www.openstreetmap.org/api/0.6/map?bbox=-9.101,38.757,-9.089,38.772
-- Alvalade source: https://www.openstreetmap.org/api/0.6/map?bbox=-9.149,38.750,-9.135,38.761
+Public geometry was retrieved on 12 November 2026. Paths were assembled offline
+from connected street/path ways, then sampled and simplified. No routing API is
+involved and no OSM contributor account metadata is shipped.
 
-Derived geographic data © OpenStreetMap contributors, available under the Open
-Database Licence (ODbL): https://www.openstreetmap.org/copyright and
+- Benfica: https://www.openstreetmap.org/api/0.6/map?bbox=-9.211,38.744,-9.193,38.756
+- Expo: https://www.openstreetmap.org/api/0.6/map?bbox=-9.101,38.757,-9.089,38.772
+- Alvalade: https://www.openstreetmap.org/api/0.6/map?bbox=-9.149,38.750,-9.135,38.761
+
+Derived geographic data © OpenStreetMap contributors, under ODbL:
+https://www.openstreetmap.org/copyright and
 https://opendatacommons.org/licenses/odbl/1-0/.
-Attribution is also visible on every map. The street background comes from the
-current online tile service; it is not embedded or available offline. Its styling
-can differ from the earlier conversation mockup and is not Google Maps imagery.
+Mandatory source attribution remains visible on each map. Explanatory provider
+banners have been removed. The muted palette is inspired by Apple Maps, not Apple
+cartography; no Apple service/token was configured. Online street tiles are not
+embedded or available offline.
 
-## Try it
+## Try it locally
 
-Sign in, open Walks and scroll to Classroom examples. Open each record, drag and
-zoom the map, choose World, then Fit route. Follow the other-example links to
-switch between the three areas, or return to All walks. Toggle “Include sample history” in Past adventures: all three samples and their
-contributions disappear/reappear together. This month includes all three; Today
-excludes these older samples. The underlying household data and Home summary stay
-unchanged. Each completed real walk contributes one count, its distance and time.
+Sign in, open Walks, select This month, and scroll to Past adventures. Open each
+record or follow the other-walk links. Pinch to zoom or use explicit +/- controls;
+ordinary mouse-wheel scrolling must move the page without changing the map scale.
+Fit route returns to the recorded trace. World and double-click zoom are removed.
+Real GPS capture and SQL permissions are unchanged. The samples cannot be edited
+or deleted as real household activities.
