@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Map as LeafletMap } from 'leaflet'
+import type { CircleMarker, Map as LeafletMap } from 'leaflet'
 import { Button } from '../../components/ui'
 import { type Point } from './gps'
 import { mapCoordinates } from './mapGeometry'
@@ -68,24 +68,23 @@ export function OpenStreetRouteMap({ points, compact = false }: { points: Point[
    tiles.addTo(instance)
    const routeLayer = L.layerGroup().addTo(instance)
    const lines = L.layerGroup().addTo(instance)
-   const cursor = L.circleMarker(coordinates[0], { radius: 6, color: '#fffdf7', weight: 3, fillColor: '#425c39', fillOpacity: 1 })
+   let finishMarker: CircleMarker | undefined
    renderFrame.current = (frame, playing) => {
     lines.clearLayers()
     for (const coordinates of frame.lines) {
      L.polyline(coordinates, { color: '#fffdf7', weight: 8, opacity: 1, interactive: false }).addTo(lines)
      L.polyline(coordinates, { color: '#425c39', weight: 5, opacity: 1, interactive: false }).addTo(lines)
     }
-    if (playing && frame.cursor) cursor.setLatLng(frame.cursor).addTo(instance!)
-    else cursor.remove()
+    if (finishMarker) { if (playing) routeLayer.removeLayer(finishMarker); else routeLayer.addLayer(finishMarker) }
    }
    draw.current = next => {
     routeLayer.clearLayers()
     const current = mapCoordinates(next)
     if (!current.length) return
     bounds = L.latLngBounds(current)
-    renderFrame.current(latestFrame.current.frame, latestFrame.current.playing)
     L.circleMarker(current[0], { radius: 6, color: '#425c39', weight: 3, fillColor: '#fffdf7', fillOpacity: 1 }).bindTooltip('Start').addTo(routeLayer)
-    L.circleMarker(current.at(-1)!, { radius: 5, color: '#fffdf7', weight: 2, fillColor: '#425c39', fillOpacity: 1 }).bindTooltip('Finish').addTo(routeLayer)
+    finishMarker = L.circleMarker(current.at(-1)!, { radius: 5, color: '#fffdf7', weight: 2, fillColor: '#425c39', fillOpacity: 1 }).bindTooltip('Finish')
+    renderFrame.current(latestFrame.current.frame, latestFrame.current.playing)
    }
    draw.current(latest.current); setReady(true)
    L.control.scale({ imperial: false }).addTo(instance)

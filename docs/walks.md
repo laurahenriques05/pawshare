@@ -346,3 +346,36 @@ the selected version reports zero vulnerabilities. Existing Zod and bundle-size
 build warnings remain; the vector renderer/worker are lazy chunks. Physical phone
 GPS/pinch, Google provider live verification and production deployment remain
 outside this local evidence.
+
+## Recent-walk preview and quieter playback (12 November 2026)
+
+Walks now shows Last Adventures with only the latest completed entry. Show more
+is a link at the section's upper right, opening the separate Past Adventures view
+via the existing `/walks?view=history` route. That view shows the complete history
+in descending start-time order, paginated in groups of 20. It preserves real
+loading/error/empty states and offers a return link to Walks. Summary totals still
+use all eligible walks in the selected period, not only the preview. The shared
+router, auth, tracker and household providers are unchanged; NFC start intent
+clears the history query so its confirmation remains visible.
+
+During replay only the fixed Start marker is shown. The Finish marker, Finish
+legend and moving cursor are absent; Finish returns after stopping or completing
+playback. This applies to vector, Leaflet fallback and optional Google renderers.
+Playback still draws only valid GPS segments and changes no saved data/statistics.
+
+The footsteps tile is 60 px with a 28 px glyph, increased from 42/20 px. The date
+and title group is vertically centred. Browser geometry measured an approximately
+0.004 px centre difference, below a screen pixel. Browser navigation verified one
+card on the main page and all three presentation cards in Past Adventures.
+
+OpenFreeMap explicitly permits omitting its name from visible credits:
+https://openfreemap.org/#attribution. The vector source attribution now overrides
+only that optional branding, retaining linked OpenMapTiles and OpenStreetMap
+credits. This corrects the earlier overly broad statement that every provider
+name had to remain. Hosting URLs, data licences and the source/style notices are
+preserved. Browser UI confirmed no visible OpenFreeMap credit and only Start
+during playback.
+
+143 isolated tests, TypeScript and build pass on Node 26.13.0; Node 22.x CI and
+physical-device validation remain pending. No migration, hosted data write, merge
+or deployment was performed for this change.

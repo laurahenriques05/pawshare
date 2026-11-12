@@ -12,6 +12,7 @@ import { clearWalkStart, pendingWalkStart } from './nfc'
 import { walkHistory, summarizeHistory, presentationHistoryEnabled } from './history'
 import { kilometersLabel } from './mapGestures'
 import { WalkActivityCard } from './WalkActivityCard'
+import { WalkHistoryPage } from './WalkHistoryPage'
 
 export function WalksPage() {
  const {session}=useAuth(),{household,dog}=useHousehold(),data=useWalks(),navigate=useNavigate()
@@ -19,7 +20,8 @@ export function WalksPage() {
  const [notify,setNotify]=useState(''),[copied,setCopied]=useState('')
  const [finishingWalk,setFinishingWalk]=useState<string|null>(null)
  const active=data.walks.find(w=>!w.ended_at&&!w.deleted_at),mine=active?.walker_id===session!.user.id
- const [historyLimit,setHistoryLimit]=useState(20)
+ const historyView=search.get('view')==='history'
+ useEffect(()=>{window.scrollTo(0,0)},[historyView])
  const history=walkHistory(data.walks,presentationHistoryEnabled(),session!.user.id)
  const summary=summarizeHistory(history,period,household!.timezone)
  const deleted=data.walks.filter(w=>w.deleted_at&&w.walker_id===session!.user.id)
@@ -30,7 +32,7 @@ export function WalksPage() {
   const completed=data.walks.find(w=>w.id===finishingWalk&&w.ended_at&&!w.deleted_at)
   if(completed)navigate(`/walks/${completed.id}`)
  },[finishingWalk,data.walks,navigate])
- useEffect(()=>{if((search.get('action')==='start'||pendingWalkStart())&&data.ready){clearWalkStart();setConfirm('start');const next=new URLSearchParams(search);next.delete('action');setSearch(next,{replace:true})}},[search,setSearch,data.ready])
+ useEffect(()=>{if((search.get('action')==='start'||pendingWalkStart())&&data.ready){clearWalkStart();setConfirm('start');const next=new URLSearchParams(search);next.delete('action');next.delete('view');setSearch(next,{replace:true})}},[search,setSearch,data.ready])
  useEffect(()=>{
   if(!confirm)return
   previousFocus.current=document.activeElement as HTMLElement
@@ -46,6 +48,7 @@ export function WalksPage() {
   if(typeof Notification==='undefined'){setNotify('This browser does not support system notifications. The in-app warning remains available.');return}
   try {const permission=await Notification.requestPermission();setNotify(permission==='granted'?'Browser notifications enabled where supported. Keep the app visible for reliable GPS and the in-app warning.':'Notifications unavailable or denied. You can still use the in-app warning.')}catch{setNotify('System notifications need the shared mobile notification integration. Use the in-app warning for now.')}
  }
+ if(historyView)return <WalkHistoryPage history={history} loading={data.loading} ready={data.ready} error={data.error} onRetry={()=>void data.reload()}/>
  return <div className="walk-page"><PageTitle eyebrow="A LITTLE FRESH AIR" title={`Out with ${dog!.name}.`}/>
   {data.error&&<Notice error>{data.error}<p><Button className="secondary" onClick={()=>{void data.reload();void data.sync()}}>Retry connection</Button></p></Notice>}
   {data.loading?<p role="status">Loading walks…</p>:!data.ready?<section className="card"><h2>Your walking diary is getting ready</h2><p>Walks and summaries will appear here once the connection is ready. GPS diagnostics and the walking lesson are available below.</p></section>:<>
@@ -64,7 +67,7 @@ export function WalksPage() {
     </>:<><p>Confirm the start, allow location access, and carry your phone with you to record the route. Your family sees it after you finish.</p><Button disabled={data.busy} onClick={()=>setConfirm('start')}>Start walk</Button></>}
    </section>
    <section className="card"><div className="walk-heading"><div><p className="eyebrow">LITTLE STEPS ADD UP</p><h2>Walking together</h2></div><select aria-label="Summary period" value={period} onChange={e=>setPeriod(e.target.value as typeof period)}><option value="day">Today</option><option value="week">This week</option><option value="month">This month</option></select></div><div className="walk-metrics"><div><strong>{summary.count}</strong><span>Completed walks</span></div><div><strong>{kilometersLabel(summary.meters)} km</strong><span>Recorded distance</span></div><div><strong>{timeLabel(summary.seconds)}</strong><span>Total time</span></div></div></section>
-   <section className="card"><div className="walk-heading"><h2>Past adventures</h2></div>{!history.length?<p className="walk-empty">Your first completed walk will appear here.</p>:<div className="walk-activity-list">{history.slice(0,historyLimit).map(w=><WalkActivityCard key={w.id} {...w} loadRoute={!w.demo}/>)}</div>}{history.length>historyLimit&&<Button className="secondary" onClick={()=>setHistoryLimit(n=>n+20)}>Show more walks</Button>}</section>
+   <section className="card"><div className="walk-heading walk-history-heading"><h2>Last Adventures</h2><Link className="walk-show-more" to="/walks?view=history">Show more</Link></div>{!history.length?<p className="walk-empty">Your first completed walk will appear here.</p>:<div className="walk-activity-list">{history.slice(0,1).map(w=><WalkActivityCard key={w.id} {...w} loadRoute={!w.demo}/>)}</div>}</section>
    {deleted.length>0&&<section className="card"><h2>Recently deleted by you</h2><p>These walks are excluded from family history and summaries. Open one to restore it.</p><ul>{deleted.map(w=><li key={w.id}><Link to={`/walks/${w.id}`}>{new Date(w.started_at).toLocaleString()}</Link></li>)}</ul></section>}
   </>}
   <section className="card"><h2>A shortcut on the leash</h2><p>Tap the NFC tag on the leash to open PawShare. Your phone records the GPS route while you carry it on the walk. Configure the tag once with this link. It opens the Start Walk confirmation for the signed-in user’s selected family. Opening a link never starts a walk automatically.</p><code className="walk-url">{window.location.origin}/walks?action=start</code><p><Button className="secondary" onClick={async()=>{try{await navigator.clipboard.writeText(`${window.location.origin}/walks?action=start`);setCopied('Link copied.')}catch{setCopied('Copy the link shown above manually.')}}}>Copy NFC link</Button></p>{copied&&<p role="status">{copied}</p>}<Link to="/walks/gps-test">Open GPS diagnostics</Link> · <Link to="/walks/learn">Read the walking lesson</Link></section>

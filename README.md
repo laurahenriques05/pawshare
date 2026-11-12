@@ -190,7 +190,12 @@ Playback draws the recorded path over approximately 12 seconds with a moving poi
 Stop replay restores the whole route. It does not record GPS, change saved points,
 recalculate statistics or connect gaps. Reduced-motion preferences show the full
 route without animation. Normal scrolling does not zoom, while explicit pinch,
-keyboard and +/- controls remain available. Map credits sit below the vector image.
+keyboard and +/- controls remain available. Map credits sit below the vector image. The optional OpenFreeMap branding is
+omitted; required OpenMapTiles and OpenStreetMap credits remain.
+
+The Walks landing page shows **Last Adventures** with the latest completed walk.
+**Show more** opens the full **Past Adventures** view at `/walks?view=history`,
+with all completed records in chronological order and a Load more control.
 
 History/detail cards and accumulated distance use kilometres, alongside duration
 and average speed. Three local presentation walks in Past adventures (Benfica,

@@ -60,12 +60,15 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
     core!.event.addListenerOnce(map, 'idle', () => { if ((map.getZoom() || 0) > 17) map.setZoom(17) })
    }
    fit.current = fitRoute
-   map.data.setStyle(feature => ({
+   const endpointStyle: google.maps.Data.StylingFunction = feature => ({
+    visible: feature.getProperty('kind') !== 'finish' || !latestFrame.current.playing,
     icon: { path: core!.SymbolPath.CIRCLE, scale: feature.getProperty('kind') === 'start' ? 6 : 5,
      fillColor: feature.getProperty('kind') === 'start' ? '#fffdf7' : '#425c39', fillOpacity: 1,
      strokeColor: feature.getProperty('kind') === 'start' ? '#425c39' : '#fffdf7', strokeWeight: 2 },
     title: feature.getProperty('kind') === 'start' ? 'Start' : 'Finish',
-   }))
+   })
+   map.data.setStyle(endpointStyle)
+   let finishVisible = true
    draw.current = next => {
     map.data.forEach(feature => map.data.remove(feature))
     const coords = mapCoordinates(next)
@@ -87,8 +90,7 @@ export default function GoogleRouteMap({ points, compact = false }: { points: Po
      const path = line.map(([lat, lng]) => new core!.LatLng(lat, lng, true))
      for (const [strokeColor, strokeWeight] of [['#fffdf7', 8], ['#425c39', 5]] as const) paths.push(new maps.Polyline({ map, path, strokeColor, strokeWeight, strokeOpacity: 1, clickable: false }))
     }
-    map.data.forEach(feature => { if (feature.getProperty('kind') === 'cursor') map.data.remove(feature) })
-    if (playing && frame.cursor) map.data.addGeoJson({ type: 'Feature', properties: { kind: 'cursor' }, geometry: { type: 'Point', coordinates: [frame.cursor[1], frame.cursor[0]] } })
+    if (finishVisible === playing) { finishVisible = !playing; map.data.setStyle(endpointStyle) }
    }
    draw.current(latest.current); renderFrame.current(latestFrame.current.frame, latestFrame.current.playing); setReady(true)
    core.event.addListenerOnce(map, 'tilesloaded', () => { if (!disposed) { window.clearTimeout(timeout); setLoading(false) } })

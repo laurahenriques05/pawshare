@@ -45,9 +45,10 @@ Style notices are retained in `public/licenses/walk-map-style.txt`.
 
 ## Try it locally
 
-Sign in, open Walks, select This month, and scroll to Past adventures. Open each
+Sign in, open Walks and select This month. Last Adventures previews the latest
+entry; Show more opens all records in Past Adventures. Open each
 record or follow the other-walk links. Pinch to zoom or use explicit +/- controls;
 ordinary mouse-wheel scrolling must move the page without changing the map scale.
-Reproduce route animates the green trace; Stop replay restores it. Fit route returns to the recorded trace. World and double-click zoom are removed.
+Reproduce route animates the green trace with only the Start marker; Stop replay restores the full route and Finish marker. Fit route returns to the recorded trace. World and double-click zoom are removed.
 Real GPS capture and SQL permissions are unchanged. The samples cannot be edited
 or deleted as real household activities.

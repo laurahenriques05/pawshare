@@ -43,7 +43,7 @@ export function WalkActivityCard({ id, title, startedAt, location, points, meter
  id: string; title: string; startedAt: string; location?: string; points?: Point[]; meters: number; seconds: number; loadRoute?: boolean
 }) {
  return <article className="walk-activity-card">
-  <div className="walk-activity-heading"><span className="icon-tile"><Footprints size={20}/></span><div><p className="muted">{new Date(startedAt).toLocaleString()}</p><h3><Link to={`/walks/${id}`}>{title}</Link></h3></div></div>
+  <div className="walk-activity-heading"><span className="icon-tile"><Footprints size={28}/></span><div><p className="muted">{new Date(startedAt).toLocaleString()}</p><h3><Link to={`/walks/${id}`}>{title}</Link></h3></div></div>
   <WalkStats meters={meters} seconds={seconds}/>
   {points ? <RouteMap points={points} compact/> : loadRoute && <SavedRoutePreview id={id}/>}
   <div className="walk-activity-footer"><Link to={`/walks/${id}`}>View walk <ArrowUpRight size={16}/></Link></div>

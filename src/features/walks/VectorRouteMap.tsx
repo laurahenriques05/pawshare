@@ -83,27 +83,26 @@ export default function VectorRouteMap({ points, compact = false }: { points: Po
     const empty = { type: 'FeatureCollection' as const, features: [] }
     map.addSource('walk-route', { type: 'geojson', data: empty })
     map.addSource('walk-ends', { type: 'geojson', data: empty })
-    map.addSource('walk-cursor', { type: 'geojson', data: empty })
     map.addLayer({ id: 'walk-route-halo', type: 'line', source: 'walk-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fffdf7', 'line-width': 8 } })
     map.addLayer({ id: 'walk-route-green', type: 'line', source: 'walk-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#425c39', 'line-width': 5 } })
     map.addLayer({ id: 'walk-ends', type: 'circle', source: 'walk-ends', paint: { 'circle-radius': 5, 'circle-color': ['match', ['get', 'kind'], 'start', '#fffdf7', '#425c39'], 'circle-stroke-color': ['match', ['get', 'kind'], 'start', '#425c39', '#fffdf7'], 'circle-stroke-width': 2.5 } })
-    map.addLayer({ id: 'walk-cursor', type: 'circle', source: 'walk-cursor', paint: { 'circle-radius': 6, 'circle-color': '#425c39', 'circle-stroke-color': '#fffdf7', 'circle-stroke-width': 3 } })
     drawPoints.current = updateBounds
+    let finishVisible = true
     let applying = false
-    let queued: { frame: ReplayFrame; playing: boolean } | null = null
+    let queued: ReplayFrame | null = null
     const flushFrame = async () => {
      if (applying || !queued || disposed) return
-     const { frame, playing } = queued
+     const frame = queued
      queued = null; applying = true
      try {
-      await Promise.all([
-       (map.getSource('walk-route') as GeoJSONSource).setData({ type: 'FeatureCollection', features: frame.lines.length ? [{ type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: frame.lines.map(line => line.map(([lat, lng]) => [lng, lat])) } }] : [] }),
-       (map.getSource('walk-cursor') as GeoJSONSource).setData({ type: 'FeatureCollection', features: playing && frame.cursor ? [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [frame.cursor[1], frame.cursor[0]] } }] : [] }),
-      ])
+      await (map.getSource('walk-route') as GeoJSONSource).setData({ type: 'FeatureCollection', features: frame.lines.length ? [{ type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: frame.lines.map(line => line.map(([lat, lng]) => [lng, lat])) } }] : [] })
      } catch { if (!disposed) setError('The route could not be drawn. Retry map.') }
      finally { applying = false; if (queued && !disposed) void flushFrame() }
     }
-    renderFrame.current = (frame, playing) => { queued = { frame, playing }; void flushFrame() }
+    renderFrame.current = (frame, playing) => {
+     if (finishVisible === playing) { finishVisible = !playing; map.setFilter('walk-ends', playing ? ['==', ['get', 'kind'], 'start'] : null) }
+     queued = frame; void flushFrame()
+    }
     updateBounds(latest.current); renderFrame.current(latestFrame.current.frame, latestFrame.current.playing)
     fit.current(); setReady(true)
    })
