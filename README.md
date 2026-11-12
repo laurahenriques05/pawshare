@@ -174,6 +174,10 @@ before using it. See [Walks setup and validation](docs/walks.md) for full rollou
 instructions and [phone GPS tests](docs/walks-gps-testing.md) for required real-device
 checks. No new browser keys or paid map service are needed.
 
+Confirming the end in Walks opens the completed route after it is saved; offline
+completion displays a pending-sync notice. NFC on the leash opens the start
+confirmation, while the phone carried by the walker supplies GPS positions.
+
 The route map currently shows the GPS path without street tiles. Stationary
 automatic ending is optional and works only with uninterrupted foreground GPS.
 Shared mobile notifications and Academy progress await the corresponding team

@@ -32,6 +32,21 @@ absent, then the complete checked-in migration ran successfully in a transaction
 No existing household, dog or authentication records were modified. The browser
 key remains unchanged; no new credentials were requested or stored.
 
+## Walk completion flow update (12 November 2026)
+
+The Start Walk confirmation and location permission precede GPS recording.
+The NFC tag on the leash opens this flow; position fixes come from the phone
+carried by the walker. The tag itself does not supply location.
+
+After a manual end confirmation on `/walks`, the page opens the completed walk's
+detail once the server returns its saved completion. Pending offline completion
+shows a saving notice and stays on the current page until synchronization succeeds.
+Leaving the page or refreshing clears this navigation intent; the completed walk
+can still be opened from history. Cancelling the confirmation keeps recording.
+The existing map shows a GPS trace without streets. Physical NFC, outdoor GPS and
+screen-lock behaviour still require real-device validation. No schema migration
+or hosted configuration change is part of this update.
+
 ## Implemented
 
 - `/walks`: explicit start/end confirmation, active status, elapsed time, GPS,
