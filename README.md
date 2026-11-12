@@ -178,12 +178,16 @@ Confirming the end in Walks opens the completed route after it is saved; offline
 completion displays a pending-sync notice. NFC on the leash opens the start
 confirmation, while the phone carried by the walker supplies GPS positions.
 
-Route maps use worldwide OpenStreetMap street tiles with an interactive dark-green
-GPS trace, zoom, dragging, Fit route and World controls. The view follows each
+Route maps use official Google Maps when the optional public browser key is
+configured; without it they show an explicitly labelled OpenStreetMap preview.
+Both offer worldwide coverage, a dark-green GPS trace, mouse-wheel/pinch zoom,
+dragging, Fit route and World controls. See [Google Maps setup](docs/walks-google-maps.md). The view follows each
 walk's saved coordinates; no city is hardcoded. History/detail cards show metres,
-duration and average speed. Street maps require internet and disclose the viewed
-area/IP to the tile provider. Three clearly labelled fictional classroom walks in
-Benfica, Expo and Alvalade appear separately from household data and statistics;
+duration and average speed. Street maps require internet and share viewed-area/device information with the
+selected map provider. Three clearly labelled fictional classroom walks in
+Benfica, Expo and Alvalade appear in Past adventures and contribute to the displayed
+Walks totals while Demonstration mode is on. “Include sample history” switches both
+the sample history and its contributions off; real saved data and Home stay intact;
 see [demo provenance](docs/walks-demo.md). No new migration is required. Stationary
 automatic ending is optional and works only with uninterrupted foreground GPS.
 Shared mobile notifications and Academy progress await the corresponding team

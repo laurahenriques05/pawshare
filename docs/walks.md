@@ -140,7 +140,12 @@ background GPS or guaranteed screen-locked notification delivery in this change.
 
 ## Maps, NFC and Academy coordination
 
-Route maps now use Leaflet 1.9.4 and OpenStreetMap street tiles worldwide.
+All route maps use one provider selection: official Google Maps when
+`VITE_GOOGLE_MAPS_API_KEY` is configured; otherwise the existing Leaflet 1.9.4 /
+OpenStreetMap preview is explicitly labelled as such. The Google branch is prepared
+but not live-verified: this checkout has no configured Google browser key.
+See [Google setup and validation](walks-google-maps.md). Both providers cover the
+world and support mouse-wheel zoom, touch pinch/drag, keyboard zoom and controls.
 The viewport is derived from each walk's coordinates, with no Lisbon boundary.
 Users can drag, pinch/zoom, fit the route or choose World. Longitude unwrapping
 keeps antimeridian crossings local. Like standard Web Mercator maps, the basemap
@@ -161,10 +166,14 @@ See https://operations.osmfoundation.org/policies/tiles/.
 
 Three classroom examples (Benfica, Expo and Alvalade) are visible under Walks,
 clearly marked as fictional. They use the same interactive map and statistics
-components as real walks, with a hide/show control and individual detail URLs
+components as real walks, with an include/exclude control and individual detail URLs
 `/walks/demo-benfica`, `/walks/demo-expo`, `/walks/demo-alvalade`. They never call
-write RPCs, receive household identities or enter family summaries, Home cards,
-reminders or real history. They can be displayed even when the walk database is
+write RPCs or receive household identities. They appear in Past adventures,
+interleaved chronologically with saved walks. In explicit Demonstration mode they
+also contribute to the displayed Walks totals for the selected calendar period.
+The “Include sample history” checkbox removes them from both that history and
+those totals. Home cards, real saved records, reminders and backend totals remain
+unaffected. They can be displayed even when the walk database is
 unavailable, after normal authentication and household onboarding. No migration
 or hosted data mutation is needed. See [demo provenance](walks-demo.md).
 
@@ -229,3 +238,19 @@ Typecheck/build checks use the available Node 26.13.0 runtime, not the requested
 Node 22.x; CI/team verification under Node 22.x remains needed. Browser checks
 cover the sample detail routes and map controls; they do not prove outdoor GPS,
 physical NFC, screen-locked tracking or worldwide map detail quality.
+
+## Google provider and combined history update (12 November 2026)
+
+Walks now defaults to This month so all three old examples are represented in the
+classroom presentation. The displayed monthly demo totals are 3 walks, 8,320 m
+(rounded combined distance), and 1h 59m (119 minutes 10 seconds before formatting).
+Normal completed walks add one count plus their saved distance and elapsed time;
+active/deleted walks are excluded. Demo selection persists in sessionStorage for
+the browser tab. Today/week/month still filter by household-local start date.
+Disabling demo history shows only real walks and real Walks totals.
+
+Google integration uses the official @googlemaps/js-api-loader, a shared lazy
+loader, roadmap tiles with no imitation styling, dark-green polylines, and
+gestureHandling=greedy. No Google requests happen without the configured key.
+Live Google visual/auth/billing checks and physical touch gestures remain pending.
+No hosted database, account security, billing or deployment configuration changed.

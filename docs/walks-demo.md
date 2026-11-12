@@ -10,9 +10,9 @@ live device fixes or recommendations for pedestrian access.
 
 `demo.ts` derives time and distance from the fixture points using the same GPS
 calculation as the real feature. No household/user IDs are assigned and no sample
-is inserted into Supabase. The samples do not contribute to real statistics,
-Home summaries or notifications. They have read-only detail pages via the existing
-`/walks/:walkId` route. Hide examples collapses them for the mounted session.
+is inserted into Supabase. The samples contribute only to the explicitly labelled demonstration-mode Walks
+totals. They never change real household statistics, Home summaries or notifications. They have read-only detail pages via the existing
+`/walks/:walkId` route. “Include sample history” controls both their presence in Past adventures and their inclusion in displayed Walks totals; the choice lasts for the browser tab session.
 Real start/finish actions continue to require authentication, household membership,
 recorder ownership and normal GPS permission. Route maps never substitute a sample
 when a real walk fails or has no coordinates.
@@ -39,5 +39,7 @@ can differ from the earlier conversation mockup and is not Google Maps imagery.
 
 Sign in, open Walks and scroll to Classroom examples. Open each record, drag and
 zoom the map, choose World, then Fit route. Follow the other-example links to
-switch between the three areas, or return to All walks. Hide/show the examples
-in the history page. The real household summary must remain unchanged.
+switch between the three areas, or return to All walks. Toggle “Include sample history” in Past adventures: all three samples and their
+contributions disappear/reappear together. This month includes all three; Today
+excludes these older samples. The underlying household data and Home summary stay
+unchanged. Each completed real walk contributes one count, its distance and time.
