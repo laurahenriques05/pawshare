@@ -47,3 +47,57 @@
 .health-sections{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.vet-page .health-section-link{display:flex;align-items:center;gap:12px;padding:20px;text-decoration:none;min-width:0}.health-section-link>svg{flex-shrink:0;color:#52764c}.health-section-link>svg:last-child{margin-left:auto}.health-section-link h2{font-size:16px;margin:0 0 4px;letter-spacing:-.02em}.health-section-link p{font-size:12px;color:#637168;margin:0;line-height:1.5}.health-section-link:hover{background:#edf2e8}.health-calendar-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:12px}.health-calendar-heading h2{margin:0 0 6px}.health-calendar-heading p{font-size:12px;margin:0}@media(max-width:700px){.health-sections{grid-template-columns:repeat(2,minmax(0,1fr))}.vet-page .health-section-link{padding:15px;gap:8px;align-items:flex-start}.health-section-link>svg:last-child{display:none}.health-section-link h2{font-size:14px}.health-calendar-heading{align-items:flex-start;flex-direction:column}.health-calendar-heading>.button{width:100%}}
 
 .vaccine-event{background:#f4ebdf;border-left-color:#a27543;color:#654927;text-decoration:none}.vaccine-event:hover{background:#ecdfcb}.vaccine-event>span{font-size:10px}.vaccine-event>strong{font-weight:650;width:100%}
+
+.weight-periods{display:flex;background:#edf0e7;padding:4px;border-radius:12px;gap:3px;margin:18px 0 24px}.weight-periods button{flex:1;min-width:0;border:0;border-radius:9px;padding:9px 3px;background:transparent;color:#637168;font-size:12px}.weight-periods button[aria-pressed=true]{background:#fff;color:#244d3c;box-shadow:0 1px 5px #244d3c14;font-weight:650}.weight-chart-summary .eyebrow{margin:0 0 6px}.weight-chart-summary .weight-chart-value{font-size:38px;font-weight:650;letter-spacing:-1.5px;line-height:1.2;margin:0 0 6px}.weight-chart-value span{font-size:18px;letter-spacing:0;font-weight:400;color:#637168}.weight-chart-summary>.muted{font-size:12px;margin:0}.weight-range{display:flex;justify-content:flex-end;gap:10px;margin:8px 0}.weight-range button{border:0;background:transparent;color:#526d48;min-width:36px;min-height:36px;display:grid;place-items:center;font-size:12px}.weight-chart{width:100%;display:block;overflow:visible}.weight-chart text{fill:#788375;font-size:10px}.weight-grid{stroke:#e2e7dc;stroke-width:1}.weight-grid-vertical{stroke-dasharray:3 4}.weight-line{fill:none;stroke:#52764c;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}.weight-point{fill:#fff;stroke:#52764c;stroke-width:2}.weight-chart g[role=button]{cursor:pointer}.weight-chart g[role=button]:focus{outline:none}.weight-chart g[role=button]:focus .weight-point{stroke:#a27543;stroke-width:3}.weight-selection{stroke:#9cab92;stroke-dasharray:4 4}.weight-chart-caption{font-size:11px;color:#788375;margin:10px 0 0}.weight-chart-empty{padding:35px 12px;text-align:center;color:#637168;font-size:14px}@media(max-width:500px){.weight-periods button{font-size:10px}.weight-chart-summary .weight-chart-value{font-size:34px}.weight-chart-caption{font-size:10px}}
+
+/* Medication treatment progress */
+.medication-progress{display:flex;align-items:center;gap:1.5rem;margin:1.5rem 0;padding:1.25rem;background:var(--surface-soft,#f5f7ee);border-radius:20px}
+.medication-progress h3{margin:.35rem 0}.medication-progress p{margin:.4rem 0}
+.medication-wheel{position:relative;width:144px;height:144px;flex:0 0 144px;color:#244e3f}
+.medication-wheel svg{display:block;width:100%;height:100%;transform:rotate(-90deg)}
+.medication-wheel circle{fill:none;stroke-width:9}.medication-wheel-track{stroke:#dfe7d8}.medication-wheel-fill{stroke:#557c4f;stroke-linecap:round;transition:stroke-dasharray .65s ease}
+.medication-wheel>span{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center}.medication-wheel strong{font-size:2rem;line-height:1.15}.medication-wheel small{font-size:.85rem}
+.medication-filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.25rem 0}.medication-filter{display:inline-flex;align-items:center;gap:.5rem;min-height:44px;padding:.55rem .9rem;border:1px solid #dbe3d5;border-radius:999px;background:#fff;color:#244e3f;font:inherit;cursor:pointer}.medication-filter[aria-pressed=true]{background:#244e3f;color:#fff;border-color:#244e3f}.medication-filter span{font-size:.85em;opacity:.85}.medication-complete{color:#355e35;font-weight:600}
+@media(max-width:480px){.medication-progress{gap:1rem;align-items:flex-start}.medication-wheel{width:112px;height:112px;flex-basis:112px}.medication-wheel strong{font-size:1.65rem}}
+@media(prefers-reduced-motion:reduce){.medication-wheel-fill{transition:none}}
+
+/* Compact, separated Health history cards */
+.walk-history.health-record-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:16px;margin-top:18px;padding:0;list-style:none;align-items:start}
+.walk-history.health-record-list>li{min-width:0;margin:0;padding:18px;border:1px solid #dfe6d8;border-radius:16px;background:#fafbf7;overflow-wrap:anywhere}
+.health-record-list>li h3{font-size:1rem;line-height:1.35;margin:0 0 9px}
+.health-record-list>li p{font-size:.875rem;line-height:1.5;margin:5px 0}
+.health-record-list>li>strong{display:block;font-size:.9rem;line-height:1.5;margin-bottom:8px}
+.health-record-list>li .walk-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.health-record-list>li .button{width:auto;min-height:40px;padding:8px 12px;font-size:.8rem;line-height:1.3;border-radius:9px;gap:6px;margin-top:12px;margin-right:8px}
+.health-record-list>li .walk-actions .button{margin:0}
+@media(max-width:540px){.walk-history.health-record-list{grid-template-columns:1fr;gap:14px}.walk-history.health-record-list>li{padding:16px}.health-record-list>li .button{min-height:44px}}
+
+/* Tap-to-confirm medication timeline */
+.medication-timeline{margin-top:24px}.medication-timeline-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}.medication-timeline-heading h3{margin:0}.medication-timeline-heading>span{font-size:.85rem;color:#637168}.medication-timeline>p{font-size:.875rem;margin:8px 0 20px}
+.dose-bubbles{display:flex;flex-wrap:wrap;gap:20px 16px;padding:0;margin:0;list-style:none}.dose-bubbles>li{display:flex;flex-direction:column;align-items:center;gap:7px;width:100px}.dose-bubble{width:96px;height:96px;border:1.5px solid #ccd8c6;border-radius:50%;background:#f7f8f0;color:#244d3c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:inherit;transition:background .2s,border-color .2s,transform .2s}.dose-bubble:hover:not(:disabled){border-color:#244d3c;transform:translateY(-2px)}.dose-bubble.is-given{background:#244d3c;border-color:#244d3c;color:#fff}.dose-bubble-day{font-size:.8rem}.dose-bubble strong{font-size:1.05rem;line-height:1.25}.dose-bubble-mark{font-size:.9rem;line-height:1}.dose-bubbles>li>small{font-size:.75rem;color:#637168}.dose-detail-link{border:0;background:transparent;color:#355b44;text-decoration:underline;text-underline-offset:3px;font:inherit;font-size:.75rem;min-height:28px;padding:2px 8px}.dose-bubble:disabled{cursor:wait}
+@media(prefers-reduced-motion:reduce){.dose-bubble{transition:none}}
+
+/* Symmetric treatment ring and connected dose timeline */
+.medication-tracker-summary{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:12px 0 22px}
+.medication-tracker-summary .medication-wheel{width:160px;height:160px;flex-basis:auto;margin:0 auto 8px}
+.medication-tracker-summary h3{margin:0;font-size:1rem}.medication-tracker-summary p{margin:0;max-width:400px;font-size:.85rem}
+.medication-timeline .dose-bubbles{display:flex;flex-wrap:nowrap;gap:0;overflow-x:auto;padding:14px 0 12px;margin:0;scroll-snap-type:x proximity}
+.dose-bubbles>li.dose-step{position:relative;isolation:isolate;flex:1 0 116px;width:auto;min-width:116px;display:grid;grid-template-rows:80px 20px 32px;justify-items:center;align-items:center;row-gap:8px;scroll-snap-align:center}
+.dose-step::before,.dose-step::after{content:'';position:absolute;top:39px;width:50%;height:2px;background:#d5dfce;z-index:-1}
+.dose-step::before{left:0}.dose-step::after{right:0}.dose-step:first-child::before,.dose-step:last-child::after{display:none}
+.dose-step.is-given::before,.dose-step.is-given::after{background:#244d3c}
+.dose-step .dose-bubble{width:80px;height:80px;gap:2px;background:#f7f8f0;transform:none}
+.dose-step .dose-bubble.is-given{background:#244d3c;color:#fff}
+.dose-step .dose-bubble-day{font-size:.7rem;line-height:1.2}.dose-step .dose-bubble strong{font-size:.8rem;line-height:1.2;font-weight:650}.dose-step .dose-bubble-mark{font-size:.7rem;line-height:1.1}
+.dose-step .dose-detail-link{margin:0;min-height:32px;line-height:1.2}.dose-step>small{line-height:20px;text-align:center}
+@media(max-width:540px){.medication-tracker-summary .medication-wheel{width:140px;height:140px}.dose-bubbles>li.dose-step{min-width:104px;flex-basis:104px}}
+
+/* Progress summary: ring beside its explanation */
+.medication-progress.medication-tracker-summary{flex-direction:row;align-items:center;text-align:left;gap:28px;padding:24px;margin:24px 0;border-radius:20px;background:#f5f7ee}
+.medication-progress.medication-tracker-summary .medication-wheel{width:144px;height:144px;flex:0 0 144px;margin:0}
+.medication-summary-copy{min-width:0}.medication-tracker-summary .medication-summary-copy .eyebrow{margin:0 0 10px;font-size:11px}.medication-tracker-summary .medication-summary-copy h3{margin:0 0 10px;font-size:1.16rem}.medication-tracker-summary .medication-summary-copy .muted{max-width:none;margin:0;font-size:.9rem;line-height:1.6}
+@media(max-width:540px){.medication-progress.medication-tracker-summary{gap:16px;padding:18px}.medication-progress.medication-tracker-summary .medication-wheel{width:108px;height:108px;flex-basis:108px}.medication-tracker-summary .medication-summary-copy h3{font-size:1rem}.medication-tracker-summary .medication-summary-copy .muted{font-size:.8rem}}
+@media(max-width:360px){.medication-progress.medication-tracker-summary{flex-direction:column;text-align:center}.medication-progress.medication-tracker-summary .medication-wheel{flex-basis:auto}}
+
+.medication-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}.medication-card-header h2{margin:0;min-width:0;overflow-wrap:anywhere}.medication-card-header .button.medication-edit-button{flex:0 0 auto;width:auto;min-height:36px;padding:6px 12px;border-radius:8px;border-color:#e3e8df;color:#637168;background:transparent;font-size:.78rem;font-weight:500;gap:4px}.medication-card-header .button.medication-edit-button:hover{background:#f5f7ee;border-color:#bccbb5;color:#244d3c}
+@media(pointer:coarse){.medication-card-header .button.medication-edit-button{min-height:44px}}
