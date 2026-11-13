@@ -195,7 +195,7 @@ omitted; required OpenMapTiles and OpenStreetMap credits remain.
 
 The Walks landing page shows **Last Adventures** with the latest completed walk.
 **Show more** opens the full **Past Adventures** view at `/walks?view=history`,
-with completed records filtered by This day, This week, This month (default) or
+with completed records filtered by Today, This week, This month (default) or
 This year in the household timezone. Weeks begin on Monday; filtering happens
 before pagination, and a Load more control reveals additional matching walks.
 

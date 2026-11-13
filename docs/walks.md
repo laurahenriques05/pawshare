@@ -382,7 +382,7 @@ or deployment was performed for this change.
 
 ### History period filter
 
-Past Adventures offers This day, This week, This month (default) and This year.
+Past Adventures offers Today, This week, This month (default) and This year.
 Calendar boundaries use the household timezone, with Monday as the first day of
 the week. Only completed history entries matching the selected period are shown;
 changing the period resets the 20-entry pagination. An empty period is distinct
