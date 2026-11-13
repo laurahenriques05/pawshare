@@ -379,3 +379,11 @@ during playback.
 143 isolated tests, TypeScript and build pass on Node 26.13.0; Node 22.x CI and
 physical-device validation remain pending. No migration, hosted data write, merge
 or deployment was performed for this change.
+
+### History period filter
+
+Past Adventures offers This day, This week, This month (default) and This year.
+Calendar boundaries use the household timezone, with Monday as the first day of
+the week. Only completed history entries matching the selected period are shown;
+changing the period resets the 20-entry pagination. An empty period is distinct
+from having no completed walks. The filter does not change saved data or totals.

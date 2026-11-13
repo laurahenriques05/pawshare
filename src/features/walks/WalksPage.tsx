@@ -48,7 +48,7 @@ export function WalksPage() {
   if(typeof Notification==='undefined'){setNotify('This browser does not support system notifications. The in-app warning remains available.');return}
   try {const permission=await Notification.requestPermission();setNotify(permission==='granted'?'Browser notifications enabled where supported. Keep the app visible for reliable GPS and the in-app warning.':'Notifications unavailable or denied. You can still use the in-app warning.')}catch{setNotify('System notifications need the shared mobile notification integration. Use the in-app warning for now.')}
  }
- if(historyView)return <WalkHistoryPage history={history} loading={data.loading} ready={data.ready} error={data.error} onRetry={()=>void data.reload()}/>
+ if(historyView)return <WalkHistoryPage history={history} timezone={household!.timezone} loading={data.loading} ready={data.ready} error={data.error} onRetry={()=>void data.reload()}/>
  return <div className="walk-page"><PageTitle eyebrow="A LITTLE FRESH AIR" title={`Out with ${dog!.name}.`}/>
   {data.error&&<Notice error>{data.error}<p><Button className="secondary" onClick={()=>{void data.reload();void data.sync()}}>Retry connection</Button></p></Notice>}
   {data.loading?<p role="status">Loading walks…</p>:!data.ready?<section className="card"><h2>Your walking diary is getting ready</h2><p>Walks and summaries will appear here once the connection is ready. GPS diagnostics and the walking lesson are available below.</p></section>:<>
