@@ -54,3 +54,25 @@ authenticated local `/feed` screen loaded the hosted household data successfully
 and Home displayed both Feeding and Walks. Production has not been updated by
 this recovery branch. Another group member must review the PR before merge and
 deployment of the resulting main commit.
+
+## Local team integration preview (13 November 2026)
+
+`codex/team-integration-preview` combines Walks from `daaf2f7` and Health/account
+from `e9a164d`, on the shared main base `4a474d7`. Feeding already exists in that
+base. No newer Tasks/Academy branch was available on origin at integration time.
+The two merge conflicts retained both feature documents and the equivalent
+browser-safe app URL fallback from Health. Feature branches and main are intact.
+
+Verification: 149 isolated tests across 29 suites passed with browser configuration
+variables blank, TypeScript and production build passed. The local authenticated
+Health screen exposes all six care sections and the Treatment history read returned
+an empty state without an error. This is read-only browser evidence, not proof of
+all writes or Edge Functions. Node 26.13.0 was used locally; CI uses Node 22.
+
+Five Health migrations and two deletion Edge Functions are included as source from
+the feature branch. This integration did not apply migrations, deploy functions,
+change Auth, modify hosted data, merge main or deploy production. Follow
+`docs/remaining-health-account.md` for review and rollout requirements; do not infer
+hosted migration status from the presence of files. Main/production updates still
+require another group member's review and passing CI. The local Vite application
+at http://127.0.0.1:5173 now runs this combined branch.

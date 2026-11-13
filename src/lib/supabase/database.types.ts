@@ -1,20 +1,27 @@
-export type Vaccination = { id:string; household_id:string; name:string; given_on:string; next_due_on:string|null; veterinarian:string; batch_number:string; notes:string; created_by:string; updated_by:string; created_at:string; updated_at:string }
-export type MedicationSchedule = { id:string; household_id:string; name:string; instructions:string; created_by:string; updated_by:string; created_at:string; updated_at:string }
+export type HealthAudit = { id:string;household_id:string;created_by:string|null;updated_by:string|null;created_at:string;updated_at:string }
+export type Treatment = HealthAudit & {title:string;occurred_on:string;veterinarian:string;notes:string}
+export type VetContact = HealthAudit & {name:string;phone:string;email:string;address:string;notes:string}
+export type WeightMeasurement = HealthAudit & {weight_kg:number;measured_at:string;notes:string}
+export type Vaccination = { id:string; household_id:string; name:string; given_on:string; next_due_on:string|null; veterinarian:string; batch_number:string; notes:string; created_by:string|null; updated_by:string|null; created_at:string; updated_at:string }
+export type MedicationSchedule = { id:string; household_id:string; name:string; instructions:string; created_by:string|null; updated_by:string|null; created_at:string; updated_at:string }
 export type MedicationDose = { id:string; schedule_id:string; scheduled_at:string; status:'scheduled'|'given'|'skipped'; administered_at:string|null; recorded_by:string|null; recorded_at:string|null; updated_at:string; notes:string }
-export type VetAppointment = { id: string; household_id: string; title: string; starts_at: string; location: string; notes: string; created_by: string; updated_by: string; created_at: string; updated_at: string }
+export type VetAppointment = { id: string; household_id: string; title: string; starts_at: string; location: string; notes: string; created_by: string|null; updated_by: string|null; created_at: string; updated_at: string }
 import type { FoodProduct, FeedingEntry, FeedingSettings, FeedingAudit, PlannedMeal, MealEvent } from '../../features/feeding/types'
 // Initial migration contract. Regenerate with the Supabase CLI after schema changes.
 export type Profile = { id: string; display_name: string; created_at: string }
-export type Household = { id: string; name: string; timezone: string; created_by: string; created_at: string }
+export type Household = { id: string; name: string; timezone: string; created_by: string|null; created_at: string }
 export type Member = { household_id: string; user_id: string; role: 'owner' | 'member'; created_at: string }
 export type Dog = { id: string; household_id: string; name: string; breed: string | null; date_of_birth: string | null; weight_kg: number | null; sex: 'male' | 'female' | 'unknown'; neutered: boolean | null; activity_level: 'low' | 'moderate' | 'high'; created_at: string }
-export type Invitation = { id: string; household_id: string; email: string; created_by: string; created_at: string; expires_at: string; accepted_at: string | null; accepted_by: string | null; revoked_at: string | null }
+export type Invitation = { id: string; household_id: string; email: string; created_by: string|null; created_at: string; expires_at: string; accepted_at: string | null; accepted_by: string | null; revoked_at: string | null }
 export type InvitationPreview = { household_id: string; household_name: string; dog_name: string | null; expires_at: string; already_member: boolean }
 export type FamilyMember = { user_id: string; display_name: string; role: string; joined_at: string }
-export type Walk = { id: string; household_id: string; dog_id: string; walker_id: string; started_at: string; ended_at: string | null; distance_m: number; notes: string; end_reason: 'manual' | 'stationary' | null; deleted_at: string | null }
+export type Walk = { id: string; household_id: string; dog_id: string; walker_id: string|null; started_at: string; ended_at: string | null; distance_m: number; notes: string; end_reason: 'manual' | 'stationary' | null; deleted_at: string | null }
 export type WalkPoint = { walk_id: string; seq: number; recorded_at: string; latitude: number; longitude: number; accuracy: number }
 type Table<R, I> = { Row: R; Insert: I; Update: Partial<I>; Relationships: [] }
 export type Database = { public: { Tables: {
+ treatments: Table<Treatment,Pick<Treatment,'household_id'|'title'|'occurred_on'|'veterinarian'|'notes'>>;
+ vet_contacts: Table<VetContact,Pick<VetContact,'household_id'|'name'|'phone'|'email'|'address'|'notes'>>;
+ weight_measurements: Table<WeightMeasurement,Pick<WeightMeasurement,'household_id'|'weight_kg'|'measured_at'|'notes'>>;
  vaccinations: Table<Vaccination,Pick<Vaccination,'household_id'|'name'|'given_on'|'next_due_on'|'veterinarian'|'batch_number'|'notes'>>;
  medication_schedules: Table<MedicationSchedule,never>;
  medication_doses: Table<MedicationDose,never>;

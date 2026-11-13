@@ -186,7 +186,7 @@ browsers unable to initialize the vector renderer. The previously prepared Googl
 provider remains optional; see [Google setup](docs/walks-google-maps.md).
 
 Each map has Start/Finish markers, **Reproduce route** and Fit route controls.
-Playback draws the recorded path over approximately 12 seconds with a moving point;
+Playback draws the recorded path over approximately 12 seconds with only the start marker;
 Stop replay restores the whole route. It does not record GPS, change saved points,
 recalculate statistics or connect gaps. Reduced-motion preferences show the full
 route without animation. Normal scrolling does not zoom, while explicit pinch,
@@ -208,3 +208,11 @@ with the provider. See [map style notices](public/licenses/walk-map-style.txt).
 Stationary automatic ending remains optional and foreground-only. Shared mobile
 notifications and Academy progress await the team's interfaces. Background or
 screen-locked GPS and physical touch-device reliability remain unverified.
+
+## Health and account additions
+
+See [remaining Health/account setup and release checks](docs/remaining-health-account.md)
+for treatment history, vet contacts, private documents, weight synchronization,
+Home summary, account settings and the server-side deletion rollout. New migrations
+and Edge Functions require coordinated review/deployment; local UI changes do not
+apply schema or publish server functions.
