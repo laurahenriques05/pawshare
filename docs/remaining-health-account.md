@@ -37,3 +37,7 @@ Validation: 122 tests passed with `npm test -- --maxWorkers=1 --hookTimeout=1200
 Before release, with disposable data only: validate both Edge Functions in Deno/Supabase, exercise successful/failed/retried Storage cleanup, Auth deletion/session expiry and retained shared records. Verify server-side environment/origin/JWT configuration; do not enable service-role access in the frontend. Test each screen at phone/desktop widths, keyboard navigation, denied access, empty/loading/errors, offline failures, family switching, profile-name propagation, Auth password policy/recent-login errors, weight historical corrections and document download/delete. Live deployment and browser interaction are not established by automated unit tests.
 
 Maria integration remains pending: agree source IDs/types, UTC instants versus date-only semantics, family timezone, deep links, audit fields, idempotent updates and cancellation. No notifications/emails or shared calendar writes are emitted.
+
+## Weight trend presentation
+
+Health-style Day/Week/Month/6 Months/Year calendar periods, previous/next controls, period average, gridlines, kg scale and keyboard/touch-selectable measurements. Months, weeks (Monday first), half-years and years use household calendar boundaries; averages are arithmetic means of actual measurements, without interpolation. Empty periods show no invented data. All original measurements remain listed below. No new migration.
