@@ -99,3 +99,27 @@ These are integration checks, not requests to decide Maria's task/reward rules:
 No team meeting is required to continue the work. Do not apply these migrations
 to the shared database or deploy the push function until the owners have
 reviewed the integration and agreed the shared rollout.
+
+## Laura migration and Feeding review
+
+Laura reviewed the two migrations against the complete existing migration
+chain. The required order is the filename order:
+`20261114120000_tasks_academy.sql` first, followed by
+`20261114130000_push_notifications.sql`. The second migration depends on the
+task tables created by the first. Neither migration has been applied to the
+shared Supabase project by this review.
+
+The new household-scoped tables now explicitly install the existing
+`private.guard_deletion()` trigger. The original deletion migration could not
+add those triggers because these tables did not exist yet. This preserves the
+existing rule that no household data is inserted or updated after household
+deletion starts.
+
+Feeding's restocking adapter is compatible with the calendar and notification
+contracts. `occursAt` and `remindAt` are already the product's buy-by instant,
+so consumers must not subtract the seven-day lead again. For notification RPCs,
+pass the adapter's stable `id` (`food-restock:<product UUID>`) as
+`p_source_id`; retain `sourceRecordId` as the underlying product UUID. Use
+`p_recipient = null`, route `/feed`, and cancel or replace the same stable ID
+when the forecast disappears or changes. Persistent/server-side recomputation
+is still required before claiming background Feeding reminders are complete.
