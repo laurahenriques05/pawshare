@@ -28,7 +28,9 @@ Feature owners implement their own UI, rules, migrations and tests. Coordinate s
 - A duplicate regular-meal warning only when another meal is recorded too soon. Treats are separate. The threshold uses the shortest planned gap, an explicit override, or the meals/day fallback.
 - Feeding NFC URL and confirmed quick logging; optional in-app tag writing on compatible Android Chrome browsers.
 
-Walks includes GPS recording, private active routes, completed history, statistics, corrections, a Home summary and a confirmed NFC start URL. Academy, Health and family tasks/calendar remain future integrations. Shared phone push delivery and persistent calendar integration are not implemented here. Lost Dog Mode has been removed from scope. Current shared Feeding data refreshes on manual refresh/window focus; the clock update does not provide cross-device live synchronisation.
+Walks includes GPS recording, private active routes, completed history, statistics, corrections, a Home summary and a confirmed NFC start URL. Tasks, Calendar and Academy now have a local implementation on Maria's feature branch; see [Tasks, Calendar, Academy and Notifications](#tasks-calendar-academy-and-notifications) for its current limits and rollout steps. Lost Dog Mode has been removed from scope. Current shared Feeding data refreshes on manual refresh/window focus; the clock update does not provide cross-device live synchronisation.
+
+For the design references and the rationale for keeping PawShare's interactions calm and accessible, see [UI design research](docs/ui-design-research.md).
 
 ## Run locally with the shared database
 
@@ -186,3 +188,63 @@ for treatment history, vet contacts, private documents, weight synchronization,
 Home summary, account settings and the server-side deletion rollout. New migrations
 and Edge Functions require coordinated review/deployment; local UI changes do not
 apply schema or publish server functions.
+
+## Tasks, Calendar, Academy and Notifications
+
+Maria's feature branch adds household tasks with one-time/daily/weekly/monthly
+recurrence, completion attribution, a shared month calendar, two starter Academy
+modules, Home summaries, notification preferences, and a Web Push service
+worker/sender. Maria's chosen demo rules and the three small teammate
+integration checks are in
+[the feature handoff](docs/tasks-calendar-academy-proposal.md). This code is
+local to that branch and is not yet merged or applied to the shared Supabase
+project.
+
+Calendar events read their source records (tasks, Feeding restock projections,
+Health appointments, vaccinations and scheduled medication doses) and link back
+to those records; the calendar does not create duplicate source rows. Task
+reminders are queued server-side. The migrations also provide common
+`sync_household_notification` and `cancel_household_notifications` RPCs for
+Laura, Beni and Carol to schedule/update/cancel their feature reminders;
+integration from those features still needs their review and implementation.
+Feeding/Health event display works from the source records. Walks does not yet
+publish events to this calendar.
+
+The Vite app runs locally, but `.env.local` still points to the shared Supabase
+project. New pages that call an RPC or table from these migrations will show a
+clear setup message until the reviewed migrations exist in that connected
+database. A local UI build does not create or apply a local database schema.
+After an approved migration is applied, refresh the Supabase API schema cache if
+PostgREST still reports that it cannot find the RPC; do not reset the database or
+re-run older migrations.
+
+### Safe rollout
+
+1. Ask Laura to review migration ordering, shared types/routes, and Feeding
+   adapter compatibility. Ask Beni and Carol the specific source/link questions
+   in the handoff document. Review the resulting changes before merge.
+2. Apply `20261114120000_tasks_academy.sql` and then
+   `20261114130000_push_notifications.sql` **only after the team has reviewed
+   and coordinated the shared database change**. Never reset the shared project
+   or re-run its existing migrations.
+3. For real push delivery, generate VAPID keys (`npx web-push generate-vapid-keys`)
+   and set the public VAPID key as `VITE_WEB_PUSH_PUBLIC_KEY` in the local/Vercel
+   build environment. It is a public key; never put the private key in a `VITE_`
+   variable. The Edge Function needs server-side `VAPID_PUBLIC_KEY`,
+   `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `SUPABASE_URL`,
+   `SUPABASE_SERVICE_ROLE_KEY`, and `PUSH_CRON_SECRET` secrets.
+4. Deploy `supabase/functions/send-push` after the migrations. Schedule it once
+   per minute with Supabase Cron/`pg_cron` + `pg_net`, send its
+   `x-cron-secret` header from Supabase Vault, and keep that secret out of the
+   browser and repository. The sender uses the service role only inside the
+   server function.
+5. Verify delivery on real devices. On iPhone/iPad, Web Push requires the site
+   to be installed to the Home Screen and permission granted from that installed
+   web app; support differs by browser/platform. No real push delivery or
+   background behavior is verified by the local tests. Do not treat the visible
+   subscription/settings UI as proof that a notification was delivered.
+
+The optional local setting is documented in `.env.example`. Existing three
+`VITE_` Supabase values remain the only required configuration for app use.
+Task reminders and their escalation are materialized by the database; the
+scheduled Edge Function is required to deliver them to subscribed devices.

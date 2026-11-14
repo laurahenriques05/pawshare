@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Home, Utensils, Footprints, GraduationCap, Ellipsis, LogOut, HeartPulse } from 'lucide-react'
+import { Home, Utensils, Footprints, GraduationCap, Ellipsis, LogOut, HeartPulse, ListChecks } from 'lucide-react'
 import { Brand, Button, Notice } from '../components/ui'
 import { db } from '../lib/supabase/client'
 import { useHousehold } from '../features/household/HouseholdProvider'
@@ -16,7 +16,8 @@ export function AppShell() {
         <NavLink to="/" end><Home size={20}/>Home</NavLink>
         <NavLink to="/feed"><Utensils size={20}/>Feed</NavLink>
         <NavLink to="/walks"><Footprints size={20}/>Walks</NavLink>
-        <span aria-disabled="true"><GraduationCap size={20}/>Academy<small>Soon</small></span>
+        <NavLink to="/academy"><GraduationCap size={20}/>Academy</NavLink>
+        <NavLink to="/tasks"><ListChecks size={20}/>Tasks</NavLink>
         <NavLink to="/health"><HeartPulse size={20}/>Health</NavLink>
         <NavLink to="/more"><Ellipsis size={20}/>More</NavLink>
       </nav>
@@ -37,7 +38,7 @@ export function AppShell() {
       <NavLink to="/" end><Home/><span>Home</span></NavLink>
       <NavLink to="/feed"><Utensils/><span>Feed</span></NavLink>
       <NavLink to="/walks"><Footprints/><span>Walks</span></NavLink>
-      <span aria-disabled="true"><GraduationCap/><span>Academy</span></span>
+      <NavLink to="/academy"><GraduationCap/><span>Academy</span></NavLink>
       <NavLink to="/health"><HeartPulse/><span>Health</span></NavLink><NavLink to="/more"><Ellipsis/><span>More</span></NavLink>
     </nav>
   </div>

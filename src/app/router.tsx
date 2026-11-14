@@ -23,6 +23,10 @@ import { pendingWalkStart, rememberWalkStart } from '../features/walks/nfc'
 import { FamilyPage } from '../features/household/FamilyPage'
 import { FeedingPage } from '../features/feeding/FeedingPage'
 import { InvitationPage } from '../features/household/InvitationPage'
+import { TasksPage } from '../features/tasks/TasksPage'
+import { CalendarPage } from '../features/tasks/CalendarPage'
+import { AcademyPage } from '../features/academy/AcademyPage'
+import { NotificationSettingsPage } from '../features/notifications/NotificationSettingsPage'
 import { invitationDestination, pendingInvitation } from '../features/household/invitations'
 function PrivateRoutes() {
  const auth = useAuth(); const data = useHousehold(); const location = useLocation()
@@ -66,6 +70,11 @@ export function Router() {
               <Route path="/walks/:walkId" element={<WalkDetailPage/>}/>
               <Route path="/walks/gps-test" element={<GpsDiagnosticPage/>}/>
               <Route path="/walks/learn" element={<WalkingLesson/>}/>
+              <Route path="/tasks" element={<TasksPage/>}/>
+              <Route path="/calendar" element={<CalendarPage/>}/>
+              <Route path="/academy" element={<AcademyPage/>}/>
+              <Route path="/academy/:moduleId" element={<AcademyPage/>}/>
+              <Route path="/more/notifications" element={<NotificationSettingsPage/>}/>
               <Route path="/more" element={<MorePage/>}/>
               <Route path="/more/dog" element={<DogProfilePage/>}/>
               <Route path="/more/family" element={<FamilyPage/>}/>

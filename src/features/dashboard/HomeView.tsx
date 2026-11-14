@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRight, Camera, PawPrint, ShieldCheck } from 'lucide-react'
 import { PageTitle } from '../../components/ui'
 import { FeedingHomeCard } from '../feeding/FeedingHomeCard'
-import { HomeFeaturePreviews } from './HomeFeaturePreviews'
 import { HomeWalkCard } from '../walks/HomeWalkCard'
+import { HomeTasksCard } from '../tasks/HomeTasksCard'
+import { HomeAcademyCard } from '../academy/HomeAcademyCard'
 import type { Dog, Household } from '../../lib/supabase/database.types'
 
 export function HomeView({ dog, household, photo, family }: { dog: Dog; household: Household; photo: ReactNode; family: ReactNode }) {
@@ -17,7 +18,7 @@ export function HomeView({ dog, household, photo, family }: { dog: Dog; househol
   <FeedingHomeCard householdId={household.id} timezone={household.timezone}/>
   <HomeWalkCard/>
   <HomeHealthCard key={household.id} home={household.id} zone={household.timezone}/>
-  <HomeFeaturePreviews/>
+  <div className="home-details-grid home-upcoming-grid"><HomeTasksCard householdId={household.id} zone={household.timezone}/><HomeAcademyCard householdId={household.id} zone={household.timezone} dogName={dog.name}/></div>
 
   <footer className="home-footer"><PawPrint size={15} aria-hidden="true"/><p>A space for <strong>{household.name}</strong>. Made for the love of your dog.</p></footer>
  </div>

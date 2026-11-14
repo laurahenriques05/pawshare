@@ -6,6 +6,14 @@ export type Vaccination = { id:string; household_id:string; name:string; given_o
 export type MedicationSchedule = { id:string; household_id:string; name:string; instructions:string; created_by:string|null; updated_by:string|null; created_at:string; updated_at:string }
 export type MedicationDose = { id:string; schedule_id:string; scheduled_at:string; status:'scheduled'|'given'|'skipped'; administered_at:string|null; recorded_by:string|null; recorded_at:string|null; updated_at:string; notes:string }
 export type VetAppointment = { id: string; household_id: string; title: string; starts_at: string; location: string; notes: string; created_by: string|null; updated_by: string|null; created_at: string; updated_at: string }
+export type TaskSeries = { id:string;household_id:string;title:string;details:string;assigned_to:string|null;first_due_at:string;recurrence:'none'|'daily'|'weekly'|'monthly';recurrence_every:number;ends_on:string|null;archived_at:string|null;created_by:string|null;updated_by:string|null;created_at:string;updated_at:string }
+export type TaskOccurrence = { id:string;household_id:string;series_id:string;title:string;details:string;assigned_to:string|null;recurrence:'none'|'daily'|'weekly'|'monthly';recurrence_every:number;due_at:string;completed_at:string|null;completed_by:string|null;created_at:string }
+export type AcademyPractice = { id:string;household_id:string;dog_id:string;module_id:string;user_id:string|null;practiced_at:string;checklist:Record<string,boolean>;performance:string;completed:boolean;deleted_at:string|null;updated_at:string }
+export type AcademyModuleProgress = { household_id:string;dog_id:string;module_id:string;completed_at:string;completed_by:string|null }
+export type AcademyModuleRow = { id:string;course_id:string;position:number }
+export type PushSubscription = { id:string;user_id:string;endpoint:string;p256dh:string;auth:string;created_at:string;updated_at:string }
+export type NotificationPreference = { user_id:string;category:'task'|'feeding'|'health'|'walk'|'academy';enabled:boolean;updated_at:string }
+export type ScheduledNotification = { id:string;household_id:string;recipient_id:string;category:NotificationPreference['category'];source_id:string;delivery_kind:'reminder'|'overdue_escalation';title:string;body:string;route:string;send_at:string;status:'pending'|'sending'|'sent'|'failed'|'cancelled';attempts:number;claimed_at:string|null;sent_at:string|null;last_error:string;created_at:string }
 import type { FoodProduct, FeedingEntry, FeedingSettings, FeedingAudit, PlannedMeal, MealEvent } from '../../features/feeding/types'
 // Initial migration contract. Regenerate with the Supabase CLI after schema changes.
 export type Profile = { id: string; display_name: string; created_at: string }
@@ -26,6 +34,14 @@ export type Database = { public: { Tables: {
  medication_schedules: Table<MedicationSchedule,never>;
  medication_doses: Table<MedicationDose,never>;
  vet_appointments: Table<VetAppointment, Pick<VetAppointment,'household_id'|'title'|'starts_at'|'location'|'notes'>>;
+ task_series: Table<TaskSeries, Pick<TaskSeries,'household_id'|'title'|'details'|'assigned_to'|'first_due_at'|'recurrence'|'recurrence_every'|'ends_on'>>;
+ task_occurrences: Table<TaskOccurrence, never>;
+ academy_practice: Table<AcademyPractice, Pick<AcademyPractice,'household_id'|'dog_id'|'module_id'|'checklist'|'performance'|'completed'>>;
+ academy_module_progress: Table<AcademyModuleProgress, never>;
+ academy_modules: Table<AcademyModuleRow, never>;
+ push_subscriptions: Table<PushSubscription, Pick<PushSubscription,'user_id'|'endpoint'|'p256dh'|'auth'>>;
+ notification_preferences: Table<NotificationPreference, Pick<NotificationPreference,'user_id'|'category'|'enabled'>>;
+ scheduled_notifications: Table<ScheduledNotification, never>;
  feeding_meal_events: Table<MealEvent, never>;
  food_products: Table<FoodProduct, never>;
  feeding_entries: Table<FeedingEntry, never>;
@@ -59,5 +75,14 @@ export type Database = { public: { Tables: {
  accept_household_invitation: { Args: { p_token: string }; Returns: string };
  revoke_household_invitation: { Args: { p_invitation: string }; Returns: undefined };
  get_household_members: { Args: { p_household: string }; Returns: FamilyMember[] };
+ save_household_task: { Args:{p_household:string;p_id:string|null;p_title:string;p_details:string;p_assigned_to:string|null;p_first_due_at:string;p_recurrence:string;p_recurrence_every:number;p_ends_on:string|null}; Returns:string };
+ generate_task_occurrences: { Args:{p_household:string;p_from:string;p_until:string}; Returns:number };
+ complete_household_task: { Args:{p_occurrence:string;p_completed:boolean}; Returns:undefined };
+ archive_household_task: { Args:{p_household:string;p_task:string}; Returns:undefined };
+ save_academy_practice: { Args:{p_household:string;p_id:string|null;p_dog:string;p_module:string;p_checklist:Record<string,boolean>;p_performance:string;p_completed:boolean;p_delete?:boolean}; Returns:string };
+ claim_due_notifications: { Args:{p_limit?:number}; Returns:ScheduledNotification[] };
+ finish_notification_delivery: { Args:{p_id:string;p_outcome:string;p_error?:string}; Returns:undefined };
+ sync_household_notification: { Args:{p_household:string;p_recipient:string|null;p_category:'feeding'|'health'|'walk'|'academy';p_source_id:string;p_delivery_kind:'reminder'|'overdue_escalation';p_title:string;p_body:string;p_route:string;p_send_at:string}; Returns:number };
+ cancel_household_notifications: { Args:{p_household:string;p_category:'feeding'|'health'|'walk'|'academy';p_source_id:string}; Returns:number };
  create_household: { Args: { p_name: string; p_timezone: string }; Returns: string };
 }; Enums: { [_ in never]: never }; CompositeTypes: { [_ in never]: never } } }
