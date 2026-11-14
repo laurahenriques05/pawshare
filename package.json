@@ -15,8 +15,11 @@
     "check:config": "node scripts/check-config.mjs"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.1.3",
     "@supabase/supabase-js": "^2.50.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.511.0",
+    "maplibre-gl": "^6.18.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
@@ -25,6 +28,8 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.15",
     "@tailwindcss/vite": "^4.1.0",
+    "@types/google.maps": "^3.66.10",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^22.20.5",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",

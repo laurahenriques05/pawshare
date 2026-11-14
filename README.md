@@ -174,10 +174,42 @@ before using it. See [Walks setup and validation](docs/walks.md) for full rollou
 instructions and [phone GPS tests](docs/walks-gps-testing.md) for required real-device
 checks. No new browser keys or paid map service are needed.
 
-The route map currently shows the GPS path without street tiles. Stationary
-automatic ending is optional and works only with uninterrupted foreground GPS.
-Shared mobile notifications and Academy progress await the corresponding team
-interfaces. Background/screen-locked tracking has not been verified on phones.
+Confirming the end in Walks opens the completed route after it is saved; offline
+completion displays a pending-sync notice. NFC on the leash opens the start
+confirmation, while the phone carried by the walker supplies GPS positions.
+
+Route maps default to a light vector basemap with white streets, subdued buildings,
+green parks and the application's dark-green GPS trace. MapLibre GL JS 6.18.0
+renders public OpenFreeMap data worldwide; there is no fixed city boundary or
+API key requirement for this provider. A Leaflet street-map fallback supports
+browsers unable to initialize the vector renderer. The previously prepared Google
+provider remains optional; see [Google setup](docs/walks-google-maps.md).
+
+Each map has Start/Finish markers, **Reproduce route** and Fit route controls.
+Playback draws the recorded path over approximately 12 seconds with only the start marker;
+Stop replay restores the whole route. It does not record GPS, change saved points,
+recalculate statistics or connect gaps. Reduced-motion preferences show the full
+route without animation. Normal scrolling does not zoom, while explicit pinch,
+keyboard and +/- controls remain available. Map credits sit below the vector image. The optional OpenFreeMap branding is
+omitted; required OpenMapTiles and OpenStreetMap credits remain.
+
+The Walks landing page shows **Last Adventures** with the latest completed walk.
+**Show more** opens the full **Past Adventures** view at `/walks?view=history`,
+with completed records filtered by Today, This week, This month (default) or
+This year in the household timezone. Weeks begin on Monday; filtering happens
+before pagination, and a Load more control reveals additional matching walks.
+
+History/detail cards and accumulated distance use kilometres, alongside duration
+and average speed. Three local presentation walks in Past adventures (Benfica,
+Expo and Alvalade) contribute to local totals without demonstration badges. They
+and their detail pages are excluded from production; real household data and Home
+stay intact. See [presentation provenance](docs/walks-demo.md). No new migration
+is required. Street maps need internet; requests share viewed-area/IP information
+with the provider. See [map style notices](public/licenses/walk-map-style.txt).
+
+Stationary automatic ending remains optional and foreground-only. Shared mobile
+notifications and Academy progress await the team's interfaces. Background or
+screen-locked GPS and physical touch-device reliability remain unverified.
 
 ## Health and account additions
 

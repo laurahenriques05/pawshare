@@ -32,6 +32,21 @@ absent, then the complete checked-in migration ran successfully in a transaction
 No existing household, dog or authentication records were modified. The browser
 key remains unchanged; no new credentials were requested or stored.
 
+## Walk completion flow update (12 November 2026)
+
+The Start Walk confirmation and location permission precede GPS recording.
+The NFC tag on the leash opens this flow; position fixes come from the phone
+carried by the walker. The tag itself does not supply location.
+
+After a manual end confirmation on `/walks`, the page opens the completed walk's
+detail once the server returns its saved completion. Pending offline completion
+shows a saving notice and stays on the current page until synchronization succeeds.
+Leaving the page or refreshing clears this navigation intent; the completed walk
+can still be opened from history. Cancelling the confirmation keeps recording.
+The existing map shows a GPS trace without streets. Physical NFC, outdoor GPS and
+screen-lock behaviour still require real-device validation. No schema migration
+or hosted configuration change is part of this update.
+
 ## Implemented
 
 - `/walks`: explicit start/end confirmation, active status, elapsed time, GPS,
@@ -125,10 +140,42 @@ background GPS or guaranteed screen-locked notification delivery in this change.
 
 ## Maps, NFC and Academy coordination
 
-The built-in SVG route map uses a local geographic projection with north, start,
-finish and an approximate scale. No coordinate is sent to any third-party map
-service and there are no keys, tile requests or map charges. Street basemap,
-zooming and map-provider selection remain a team integration decision.
+All route maps use one provider selection: official Google Maps when
+`VITE_GOOGLE_MAPS_API_KEY` is configured; otherwise the existing Leaflet 1.9.4 /
+OpenStreetMap preview is explicitly labelled as such. The Google branch is prepared
+but not live-verified: this checkout has no configured Google browser key.
+See [Google setup and validation](walks-google-maps.md). Both providers cover the
+world and support mouse-wheel zoom, touch pinch/drag, keyboard zoom and controls.
+The viewport is derived from each walk's coordinates, with no Lisbon boundary.
+Users can drag, pinch/zoom, fit the route or choose World. Longitude unwrapping
+keeps antimeridian crossings local. Like standard Web Mercator maps, the basemap
+ends near ±85.05° latitude; stored GPS coordinates are not truncated. Detail and
+history cards show distance in metres, duration and average speed, including stops.
+GPS gaps remain disconnected. Existing recorder-only active-route RLS is unchanged.
+
+Street tiles load only when the map enters the viewport. Requests use HTTPS,
+normal browser caching, visible attribution and an origin-only Referer (per-image
+policy, without changing the application's no-referrer header for invitations).
+Only the visible area is requested: no offline tile downloads or prefetching.
+The external provider receives IP and viewed tile areas; this is disclosed beneath
+each map. Exact GPS points stay in the browser/Supabase and are not submitted to a
+routing service. Internet and provider availability are needed for street imagery;
+a tile failure leaves the recorded trace visible with a retry action. OSM's public
+service has no SLA; reassess a managed tile provider before large-scale rollout.
+See https://operations.osmfoundation.org/policies/tiles/.
+
+Three classroom examples (Benfica, Expo and Alvalade) are visible under Walks,
+clearly marked as fictional. They use the same interactive map and statistics
+components as real walks, with an include/exclude control and individual detail URLs
+`/walks/walk-benfica`, `/walks/walk-expo`, `/walks/walk-alvalade`. They never call
+write RPCs or receive household identities. They appear in Past adventures,
+interleaved chronologically with saved walks. In explicit Demonstration mode they
+also contribute to the displayed Walks totals for the selected calendar period.
+The “Include sample history” checkbox removes them from both that history and
+those totals. Home cards, real saved records, reminders and backend totals remain
+unaffected. They can be displayed even when the walk database is
+unavailable, after normal authentication and household onboarding. No migration
+or hosted data mutation is needed. See [demo provenance](walks-demo.md).
 
 Proposed NFC convention: `/<feature>?action=<action>`, currently
 `/walks?action=start`. Laura should use/confirm the common convention for Feed.
@@ -154,8 +201,8 @@ Zod annotation warnings.
 
 Visual verification uses isolated sample fixtures, not real Supabase records:
 desktop and 390px mobile, active walk, completed details/map, edit fields, NFC
-confirmation, keyboard Escape and focus return. No sample fixture is included in
-the production app. This does not replace the following live checks:
+confirmation, keyboard Escape and focus return. The three explicitly labelled classroom fixtures are included in the app;
+they are separate from production household data. This does not replace the following live checks:
 
 1. Owner A starts, retries Start, records outdoors, refreshes and explicitly resumes.
 2. Member B sees active status but no coordinates via UI and direct API. B cannot
@@ -181,3 +228,162 @@ the production app. This does not replace the following live checks:
 Browser API references used for implementation:
 [Geolocation watchPosition](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition)
 and [Notifications API](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API).
+
+## Worldwide maps update validation (12 November 2026)
+
+125 isolated tests pass, including synthetic routes in New York, Sydney and Tokyo,
+antimeridian crossings in both directions, invalid/polar/empty coordinates, GPS
+gaps and all three demo fixtures. Existing SQL security tests remain unchanged.
+Typecheck/build checks use the available Node 26.13.0 runtime, not the requested
+Node 22.x; CI/team verification under Node 22.x remains needed. Browser checks
+cover the sample detail routes and map controls; they do not prove outdoor GPS,
+physical NFC, screen-locked tracking or worldwide map detail quality.
+
+## Google provider and combined history update (12 November 2026)
+
+Walks now defaults to This month so all three old examples are represented in the
+classroom presentation. The displayed monthly demo totals are 3 walks, 8,320 m
+(rounded combined distance), and 1h 59m (119 minutes 10 seconds before formatting).
+Normal completed walks add one count plus their saved distance and elapsed time;
+active/deleted walks are excluded. Demo selection persists in sessionStorage for
+the browser tab. Today/week/month still filter by household-local start date.
+Disabling demo history shows only real walks and real Walks totals.
+
+Google integration uses the official @googlemaps/js-api-loader, a shared lazy
+loader, roadmap tiles with no imitation styling, dark-green polylines, and
+gestureHandling=greedy. No Google requests happen without the configured key.
+Live Google visual/auth/billing checks and physical touch gestures remain pending.
+No hosted database, account security, billing or deployment configuration changed.
+
+## Apple Maps-inspired presentation update (12 November 2026)
+
+This update supersedes the demo-mode controls and wheel/World behaviour described
+above. The Mac Maps app was opened, but its tile canvas was blank during native
+inspection; Apple Maps on the web supplied the visible cartographic reference.
+No Apple Maps SDK, token or hosted service was configured. The working basemap
+keeps its licensed provider, with subdued raster colours and quieter controls
+inspired by Apple Maps. Required attribution stays visible; verbose supplier and
+configuration messages were removed from map captions. The World button is gone
+from both provider components; coverage still follows arbitrary GPS coordinates.
+
+Accumulated and individual displayed distances now use kilometres to two decimal
+places. Internal distances and SQL remain in metres. The three local presentation
+walks appear in Past adventures, contributing to this month's total of 8.32 km,
+3 walks and 1h 59m. At the user's explicit request the presentation has no fictional
+or demo labels. Those unlabelled fixtures and their detail pages are now gated by
+Vite's development flag: production shows only saved walks. They were not inserted
+into the database and do not change Home's real household statistics. The former
+Include sample history control/session preference is no longer used.
+
+Canonical presentation URLs are `/walks/walk-benfica`, `/walks/walk-expo` and
+`/walks/walk-alvalade`; earlier demo-prefixed URLs redirect locally. No shared
+router/schema contract changed.
+
+Normal mouse-wheel or two-finger scrolling passes to the page without changing the
+map. Trackpad pinch is identified by the browser Ctrl+wheel signal and handled
+inside the map. Touch pinch is enabled; one-finger map dragging is disabled for
+coarse-pointer devices so normal page scrolling is available. Double-click zoom
+is disabled; keyboard/+/- controls and Fit route remain as deliberate accessible
+actions. Google, if configured later, uses cooperative gesture handling. Map
+updates draw new points without repeatedly fitting the camera.
+
+Browser evidence: ordinary wheel scrolling over the sample map moved page scroll
+from 276 to 0 while its scale stayed at 300 m. Physical touch/trackpad pinch still
+needs device testing. Gesture tests cover ordinary scrolling, Ctrl+wheel pinch in
+both directions, small-event accumulation, reversal and line units; distance tests
+cover km formatting. The fixture gate is tested with development on/off.
+
+Local verification for this update: 138 isolated tests, TypeScript and production
+build pass on Node 26.13.0 (Node 22.x CI remains required). Browser checks confirmed
+km formatting, no World/demo labels, canonical URLs, the legacy local redirect and
+normal-scroll camera stability. No production release, hosted migration or data
+change was performed; commit/push status is reported in the handoff.
+
+## Vector maps and route reproduction (12 November 2026)
+
+The supplied light-map screenshots now guide a vector basemap instead of a colour
+filter over raster street images. MapLibre GL JS 6.18.0 loads a locally stored,
+customized OpenFreeMap Positron style and worldwide public vector tiles/fonts.
+White roads, pale-green parks, subtle buildings, north and a metric scale match
+the reference's visual hierarchy. Credits remain visible but are outside the
+vector image, below its controls. A Leaflet raster fallback remains for vector
+initialization failure; an optional configured Google provider remains supported.
+Neither Apple nor Google imagery is copied. OpenFreeMap requires no account/key.
+Provider availability and WebGL performance on real phones still need validation.
+The lazy vector renderer/worker add sizeable separate chunks to the build.
+
+Reproduce route appears next to Start/Finish on each map, with Stop replay while
+playing. Playback takes approximately 12 seconds, draws by recorded distance and
+shows a moving cursor. It never joins missing GPS segments. Starting playback fits
+the route once; it does not repeatedly pan the camera. Stop, completion, point-set
+changes and unmount clean up animation work. Reduced-motion users receive the full
+route without animation. GeoJSON worker updates are coalesced so map rendering can
+keep pace with animation. No database/RPC/statistics changes are part of playback.
+
+The visible Pinch/scroll instructions, calendar-period prose, repeated location
+footer/detail heading and GPS-calculation help paragraph were removed as requested.
+Date and metrics remain. The shared icon tile's inherited bottom margin was the
+header misalignment cause; feature-scoped CSS resets it and vertically centres the
+complete date/title group against the footsteps tile.
+
+Tests cover playback start/mid/end geometry, distance-based interpolation, gaps,
+antimeridian, invalid progress, empty/single-point routes and fixture/statistics
+immutability. Browser checks confirmed an intermediate green trail/cursor and the
+Stop replay reset. Licensing notices and upstream credits are retained at
+`public/licenses/walk-map-style.txt`. No hosted data or migrations were changed.
+
+References: https://openfreemap.org/quick_start/ and
+https://github.com/hyperknot/openfreemap-styles.
+
+Final verification for vector maps/playback: 143 isolated tests, TypeScript and
+production build pass on the available Node 26.13.0 runtime (Node 22.x CI remains
+required). Browser evidence covers an intermediate moving cursor/partial green
+trail, Stop replay restoration, automatic completion, unchanged 3-walk/8.32-km/
+1h-59m presentation totals, credits outside the image and header centre offset of
+0 px between the footsteps tile and date/title block. MapLibre 6.18.0 was chosen
+after the earlier major version triggered an npm advisory; installation/audit for
+the selected version reports zero vulnerabilities. Existing Zod and bundle-size
+build warnings remain; the vector renderer/worker are lazy chunks. Physical phone
+GPS/pinch, Google provider live verification and production deployment remain
+outside this local evidence.
+
+## Recent-walk preview and quieter playback (12 November 2026)
+
+Walks now shows Last Adventures with only the latest completed entry. Show more
+is a link at the section's upper right, opening the separate Past Adventures view
+via the existing `/walks?view=history` route. That view shows the complete history
+in descending start-time order, paginated in groups of 20. It preserves real
+loading/error/empty states and offers a return link to Walks. Summary totals still
+use all eligible walks in the selected period, not only the preview. The shared
+router, auth, tracker and household providers are unchanged; NFC start intent
+clears the history query so its confirmation remains visible.
+
+During replay only the fixed Start marker is shown. The Finish marker, Finish
+legend and moving cursor are absent; Finish returns after stopping or completing
+playback. This applies to vector, Leaflet fallback and optional Google renderers.
+Playback still draws only valid GPS segments and changes no saved data/statistics.
+
+The footsteps tile is 60 px with a 28 px glyph, increased from 42/20 px. The date
+and title group is vertically centred. Browser geometry measured an approximately
+0.004 px centre difference, below a screen pixel. Browser navigation verified one
+card on the main page and all three presentation cards in Past Adventures.
+
+OpenFreeMap explicitly permits omitting its name from visible credits:
+https://openfreemap.org/#attribution. The vector source attribution now overrides
+only that optional branding, retaining linked OpenMapTiles and OpenStreetMap
+credits. This corrects the earlier overly broad statement that every provider
+name had to remain. Hosting URLs, data licences and the source/style notices are
+preserved. Browser UI confirmed no visible OpenFreeMap credit and only Start
+during playback.
+
+143 isolated tests, TypeScript and build pass on Node 26.13.0; Node 22.x CI and
+physical-device validation remain pending. No migration, hosted data write, merge
+or deployment was performed for this change.
+
+### History period filter
+
+Past Adventures offers Today, This week, This month (default) and This year.
+Calendar boundaries use the household timezone, with Monday as the first day of
+the week. Only completed history entries matching the selected period are shown;
+changing the period resets the 20-entry pagination. An empty period is distinct
+from having no completed walks. The filter does not change saved data or totals.
