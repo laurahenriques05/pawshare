@@ -66,6 +66,10 @@ alter table public.scheduled_notifications enable row level security;
 revoke all on public.scheduled_notifications from anon,authenticated;
 grant select on public.scheduled_notifications to authenticated;
 create policy notification_read_self on public.scheduled_notifications for select to authenticated using(recipient_id=auth.uid() and private.is_member(household_id));
+-- Keep notification writes frozen while the household is being deleted. The
+-- original deletion migration predates this table, so it could not add this.
+create trigger guard_deletion before insert or update on public.scheduled_notifications
+ for each row execute function private.guard_deletion();
 
 -- Feature owners call this contract with their stable source record ID. Task
 -- reminders stay internal so callers cannot bypass task recipient/escalation

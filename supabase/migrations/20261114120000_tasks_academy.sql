@@ -45,6 +45,12 @@ revoke all on public.task_series,public.task_occurrences from anon,authenticated
 grant select on public.task_series,public.task_occurrences to authenticated;
 create policy task_series_read on public.task_series for select to authenticated using (private.is_member(household_id));
 create policy task_occurrences_read on public.task_occurrences for select to authenticated using (private.is_member(household_id));
+-- These tables are newer than the account/household deletion migration, whose
+-- one-time trigger loop only covered tables that existed at that point.
+create trigger guard_deletion before insert or update on public.task_series
+ for each row execute function private.guard_deletion();
+create trigger guard_deletion before insert or update on public.task_occurrences
+ for each row execute function private.guard_deletion();
 
 create function public.save_household_task(
  p_household uuid,p_id uuid,p_title text,p_details text,p_assigned_to uuid,
@@ -164,6 +170,8 @@ alter table public.academy_module_progress enable row level security;
 revoke all on public.academy_module_progress from anon,authenticated;
 grant select on public.academy_module_progress to authenticated;
 create policy academy_progress_read on public.academy_module_progress for select to authenticated using(private.is_member(household_id));
+create trigger guard_deletion before insert or update on public.academy_module_progress
+ for each row execute function private.guard_deletion();
 
 create table public.academy_practice (
  id uuid primary key default gen_random_uuid(),
@@ -185,6 +193,8 @@ alter table public.academy_practice enable row level security;
 revoke all on public.academy_practice from anon,authenticated;
 grant select on public.academy_practice to authenticated;
 create policy academy_practice_read on public.academy_practice for select to authenticated using(private.is_member(household_id));
+create trigger guard_deletion before insert or update on public.academy_practice
+ for each row execute function private.guard_deletion();
 
 create function public.save_academy_practice(p_household uuid,p_id uuid,p_dog uuid,p_module text,p_checklist jsonb,p_performance text,p_completed boolean,p_delete boolean default false) returns uuid
 language plpgsql security definer set search_path='' as $$

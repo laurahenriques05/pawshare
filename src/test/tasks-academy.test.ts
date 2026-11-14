@@ -34,7 +34,23 @@ it('enforces task household access, recurrence materialization and completion ow
  const user=async(id:string)=>sql.exec(`reset role;set role authenticated;select set_config('request.jwt.claim.sub','${id}',false)`)
  try{
   await sql.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}'::jsonb);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`)
-  for(const file of ['202611070001_initial_schema.sql','20261114120000_tasks_academy.sql','20261114130000_push_notifications.sql'])await sql.exec(readFileSync('supabase/migrations/'+file,'utf8'))
+  await sql.exec(readFileSync('supabase/migrations/202611070001_initial_schema.sql','utf8'))
+  // Minimal copy of the already-applied deletion guard contract. The feature
+  // migrations run after that migration and must add its trigger to new tables.
+  await sql.exec(`alter table public.households add column deletion_requested_by uuid references auth.users(id);
+   create table private.account_deletions(user_id uuid primary key references auth.users(id) on delete cascade);
+   create or replace function private.is_member(p_household uuid) returns boolean language sql stable security definer set search_path='' as $$
+    select exists(select 1 from public.household_members m join public.households h on h.id=m.household_id
+     where m.household_id=p_household and m.user_id=auth.uid() and h.deletion_requested_by is null
+     and not exists(select 1 from private.account_deletions where user_id=auth.uid()));
+   $$;
+   create function private.guard_deletion() returns trigger language plpgsql security definer set search_path='' as $$
+   begin
+    perform 1 from public.households where id=new.household_id for update;
+    if exists(select 1 from public.households where id=new.household_id and deletion_requested_by is not null) then raise exception 'Family deletion pending'; end if;
+    return new;
+   end;$$;`)
+  for(const file of ['20261114120000_tasks_academy.sql','20261114130000_push_notifications.sql'])await sql.exec(readFileSync('supabase/migrations/'+file,'utf8'))
   await sql.exec(`insert into auth.users(id) values('${a}'),('${b}'),('${c}')`);await user(a)
   const home=(await sql.query<{id:string}>("select public.create_household('A','Europe/Lisbon') id")).rows[0].id
   await sql.exec(`reset role;insert into public.household_members(household_id,user_id,role) values('${home}','${b}','member')`);await user(a)
@@ -71,6 +87,10 @@ it('enforces task household access, recurrence materialization and completion ow
   expect(cancelled.rows[0].public).toBe(2)
   await expect(sql.query("select public.sync_household_notification($1,$2,'health','other','reminder','No','', '/health',now())",[home,c])).rejects.toThrow('current family member')
   await expect(sql.query("select public.sync_household_notification($1,null,'health','bad-route','reminder','No','', '/\\evil.example',now())",[home])).rejects.toThrow('Invalid notification details')
+  await sql.exec(`reset role;update public.households set deletion_requested_by='${a}' where id='${home}'`)
+  await expect(sql.query("insert into public.task_series(household_id,title,first_due_at) values($1,'Blocked during deletion',now())",[home])).rejects.toThrow('Family deletion pending')
+  expect((await sql.query<{count:number}>("select count(*) count from pg_trigger where not tgisinternal and tgname='guard_deletion' and tgrelid in ('public.task_series'::regclass,'public.task_occurrences'::regclass,'public.academy_module_progress'::regclass,'public.academy_practice'::regclass,'public.scheduled_notifications'::regclass)")).rows[0].count).toBe(5)
+  await sql.exec(`update public.households set deletion_requested_by=null where id='${home}'`);await user(b)
   const oldTask=(await sql.query<{id:string}>('select public.save_household_task($1,null,$2,\'\',null,clock_timestamp()+interval \'2 hours\',\'none\',1,null) id',[home,'Vet check'])).rows[0].id
   const oldOccurrence=(await sql.query<{id:string}>('select id from public.task_occurrences where series_id=$1',[oldTask])).rows[0].id
   await sql.exec('reset role')
