@@ -35,21 +35,23 @@ coverage still depend on the provider; unseen/unmapped places cannot be invented
 Turning dog places off hides both tile and retained layers. Nearby Overpass
 results remain optional and use the existing consent/query behaviour.
 
-## Proposed schema and release
+## Schema and rollout
 
-`20261119165100_walk_routine_preferences.sql` is a new, **unapplied** proposal after
-`20261119001000_walk_journal_and_daily_plan.sql`. It adds explicit routine choice,
+`20261119165100_walk_routine_preferences.sql` was applied to shared Supabase on
+19 November 2026, after `20261119001000_walk_journal_and_daily_plan.sql`.
+The user explicitly confirmed team approvals before application. It adds explicit routine choice,
 optional estimated times and a membership-checked `set_walk_routine` RPC. Existing
 plan RLS and no-direct-write permissions remain. Invalid counts/times, anonymous
 callers and outsiders are rejected. Legacy count saves still work and clear stale
 time hints. No existing checks, walks or notes are deleted. Shared generated types
-are untouched. Laura must coordinate review/order and reconcile the hosted ledger
-before application; no remote migration or account write was performed here.
+are untouched. The rollout below records the installed ledger versions. Do not reapply these
+files. No household routine or activity record was created during rollout.
 
 The client needs these new fields/RPC to read/save the routine. If missing it
 shows an unavailable/retry state and does not claim success or fall back to a
-browser-only “saved” plan. This source change does not update the public app:
-review, passing CI, merge and deployment of that merged commit remain separate.
+browser-only “saved” plan. PR #50 is merged as `bfd2e6a`; the public site serves the matching frontend
+bundle (`index-DKmUNcYE.js`). No additional frontend deployment was performed
+for this database rollout; the production deployment metadata SHA was not inspected.
 
 ## Verification
 
@@ -86,3 +88,29 @@ unit tests remain intact; no product configuration/security or CI rules changed.
 The original failure was reproduced locally with all three VITE app/Supabase
 variables blank before fixing it. The full isolated suite is rerun with those
 variables blank, followed by typecheck/build and both GitHub Verify executions.
+
+## Hosted rollout evidence — 19 November 2026
+
+Applied only the two missing, versioned source migrations after checking the
+hosted schema, prerequisites and migration ledger. Earlier installed Walks
+migrations were not rerun. Ledger mapping:
+
+| Repository source | Hosted version/name |
+| --- | --- |
+| `20261119001000_walk_journal_and_daily_plan.sql` | `20261119172420_walk_journal_and_daily_plan` |
+| `20261119165100_walk_routine_preferences.sql` | `20261119172455_walk_routine_preferences` |
+
+Both application calls succeeded and both ledger entries were independently read
+back. All three new tables have RLS enabled, authenticated SELECT, no direct
+authenticated INSERT and no anonymous SELECT. Journal append, daily checks and
+routine RPCs permit authenticated execution and reject anonymous execution.
+A zero-row anonymous REST schema probe recognised required_count, routine_enabled
+and estimated_times; it returned the expected 401/42501 access denial, not a
+missing-table/column error. No private household rows were retrieved.
+
+The production /walks browser visit redirected to sign-in because the inspection
+session had no authenticated account. First-run choice, save/reload and opt-out
+were previously checked with local fixtures/isolated SQL; they were not repeated
+on a real hosted account here. The user must choose their own count/times.
+No fake goal, completed walk, manual check or note was inserted. No new production
+frontend release, unrelated migration or Auth setting change was performed.

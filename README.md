@@ -429,9 +429,8 @@ Vaccinations, medications, weight and appointments use native modal add/edit for
 
 Save Note now adds timestamped history entries and clears the editor. Today's
 walks tracks a household's chosen daily count, using completed walks and explicit
-manual checks without fabricated GPS/time data. These features require the
-proposed, unapplied `20261119001000_walk_journal_and_daily_plan.sql` migration and
-Laura/team review. Missing notes integration no longer blocks route completion;
+manual checks without fabricated GPS/time data. The journal/daily-plan migration was applied to shared Supabase on 19 November
+as `20261119172420`, following user confirmation of team approvals; do not rerun it. Missing notes integration no longer blocks route completion;
 unsynchronised notes remain marked pending. See [rollout and verification](docs/walks-journal-daily.md).
 
 ### Walk collar overview and routine
@@ -452,9 +451,11 @@ Layers icon are removed; chevrons are lighter and the tag illustration includes
 a dog. Initial framing approaches from the world map over three seconds; opt-in
 dog places already observed remain visible at moderate zoom-out.
 
-Routine persistence requires proposed, **unapplied** migration
-`20261119165100_walk_routine_preferences.sql`, after the journal/daily-plan
-migration. Laura/team review and rollout remain required. Missing backend support
-shows an error, never a falsely saved routine. These are source/local validations,
-not a claim that the public app or hosted schema has been updated. See
+Routine persistence is now installed in shared Supabase: the journal/daily-plan
+migration was applied as `20261119172420` and routine preferences as
+`20261119172455`, on 19 November after user confirmation of team approvals.
+Do not reapply them. The public frontend already serves PR #50 code. RLS, RPC
+permissions and API schema recognition were checked; authenticated save/reload
+in a real household remains unverified in this rollout. Missing backend support
+still shows an error, never a falsely saved routine. See
 [behaviour and verification limits](docs/walks-routine-map-details.md).

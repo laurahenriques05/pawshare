@@ -2,9 +2,10 @@
 
 The explicit routine/map requests are implemented in source on
 `codex/walk-routine-map-details`; see [the request-by-request handoff](walks-routine-map-details.md).
-This adds one proposed, unapplied migration:
-`20261119165100_walk_routine_preferences.sql`, after the journal/daily-plan file.
-No shared Supabase migration, merge or production deployment was performed.
+PR #50 is merged. Following explicit user confirmation of team approvals, the
+journal/daily-plan and routine-preferences migrations were applied to shared
+Supabase on 19 November. See the hosted ledger mapping and verification in the
+handoff above; do not reapply them. No additional frontend deployment was made.
 The older snapshots below do not describe these new behaviours or establish
 that the requested public app has been updated.
 

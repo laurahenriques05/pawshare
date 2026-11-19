@@ -1,3 +1,13 @@
+# Hosted status update — 19 November 2026
+
+The journal/daily-plan migration was applied as hosted ledger version
+`20261119172420`, followed by routine preferences as `20261119172455`, after
+explicit user confirmation of team approvals. Do not reapply either migration.
+See [rollout evidence and remaining device/account checks](walks-routine-map-details.md#hosted-rollout-evidence--19-november-2026).
+The original implementation diagnosis below is historical; it does not describe
+the current journal/daily-plan installation status. Earlier pause/segment
+migrations were not included in this rollout.
+
 # Walk journal, daily count and opening transitions
 
 ## Implemented source behaviour
