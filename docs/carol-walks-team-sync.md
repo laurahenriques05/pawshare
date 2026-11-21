@@ -24,11 +24,15 @@ Recheck current main and production before making a new release claim.
 
 ## Current follow-up branch
 
-Main includes #73/#74: recording-only active page, 2+5 minute GPS warning and the
+`codex/walks-back-and-nfc-alignment` changes the detail link to ← Back and
+centres each NFC step’s title/description using balanced icon gutters. Feeding
+and NFC behaviour are unchanged. These visual changes await review/publication.
+
+Main includes #73/#74/#76: recording-only active page, 2+5 minute GPS warning and the
 approved two-column summary below the unchanged routine. Statistics open by
 default; History remains a text link and the saved route is compact.
 
-`codex/walks-family-removal` aligns the chart caption left, sizes the measure
+The merged source aligns the chart caption left, sizes the measure
 selector to its label and removes extra NFC margins. The requested deletion
 contract now lets current members soft-delete or permanently remove any completed
 family walk, directly or from Deleted. Restoration/correction remain author-only.
@@ -102,7 +106,7 @@ Hosted migration ledger and function definitions were inspected read-only on
 source/hosted version mapping. Journal/routine preferences, waste/tracking,
 deleted-owner preview, pause duration and timeline corrections are installed.
 
-Current follow-up suite: 297 isolated tests/67 files passed on Node 22.23.5 with
+Current follow-up suite: 299 isolated tests/68 files passed on Node 22.23.5 with
 browser configuration blank; TypeScript/build and Markdown links also passed.
 See verification.md for current checks
 and evidence limits. Existing Zod annotation/bundle advisories remain.

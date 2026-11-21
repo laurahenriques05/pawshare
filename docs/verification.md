@@ -4,10 +4,10 @@ Updated 21 November 2026. Test counts are observations, not permanent guarantees
 Use Node 22.x >=22.12; npm test, npm run typecheck, npm run build and git diff
 --check. Tests must not call the hosted database or send real emails/push.
 
-## Latest checks — Walks family removal
+## Latest checks — Walks Back/NFC alignment
 
-On `codex/walks-family-removal` (base main `fd4a4b3`), all
-**297 isolated tests in 67 files**
+On `codex/walks-back-and-nfc-alignment` (base main `f942ad8`), all
+**299 isolated tests in 68 files**
 passed on Node 22.23.5 with both Supabase browser values blank.
 TypeScript, production build and git diff --check also passed. Changed Markdown file links were checked.
 Existing node_modules were reused; this is not a fresh npm ci. The care-task
@@ -19,14 +19,12 @@ Existing Zod annotation and large-bundle advisories remain; they are not failed
 checks. PGlite/minimal Auth/Storage roles cover isolation, rejected writes, retries,
 stock, routines, GPS/timeline and deletion. This is not a hosted security audit.
 
-Current real-component fixtures at 1280px/360px checked left-aligned captions,
-content-sized measure selectors, 22px/16px NFC gaps and soft/permanent confirmation
-transitions. The Deleted family fixture showed another author’s summary and
-permanent-removal control without route, notes, waste or Restore. Hosted access
-was blocked and fixtures removed. SQL tests cover family removal, private child
-isolation/cascades, author-only restore, forbidden roles/former members, active
-walk rejection, task-source cleanup and the single-migration rollout over the
-existing core/pause contract. No real activities were removed.
+Current real-component fixtures at 1280px/360px checked ← Back and centred NFC
+step titles/descriptions. Text-container centres matched the rectangle centres
+at both widths, with no horizontal page overflow at 360px. No NFC tags were
+written and no hosted database requests were made; fixtures were removed. This
+branch only changes labels/styles, retaining the existing tested deletion/GPS
+contracts and their pending hosted/device validation.
 These checks are not physical tags, live account persistence or actual GPS.
 
 ## Read-only hosted evidence — 20 November

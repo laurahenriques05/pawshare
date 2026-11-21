@@ -298,3 +298,7 @@ dialog.walk-routine-summary{position:fixed;inset:0;margin:auto;height:fit-conten
 .walk-summary-chart.is-compact .walk-measure-select .walk-filter-trigger>svg{width:14px;height:14px;padding-left:8px}
 .walk-page>details.walk-nfc-section{margin:0}
 @media(pointer:coarse){.walk-summary-chart.is-compact .walk-measure-select .walk-filter-trigger{min-height:44px}}
+
+/* Equal icon-side gutters centre each NFC step's copy in its whole rectangle. */
+.walk-tag-setup .feeding-tag-guide li{display:grid;grid-template-columns:32px minmax(0,1fr) 32px;align-items:center;gap:10px}
+.walk-tag-setup .feeding-tag-guide li>div{grid-column:2;text-align:center}

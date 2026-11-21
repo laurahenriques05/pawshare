@@ -43,7 +43,7 @@ export function WalkTagSetup({ householdId }: { householdId: string }) {
    setMessage('Copy the link below, then paste it into a Custom URL/URI record in NFC Tools.')
   }
  }
- return <section className="card feeding-routine feeding-tag-setup"><h2>Set up your walking NFC tag</h2>
+ return <section className="card feeding-routine feeding-tag-setup walk-tag-setup"><h2>Set up your walking NFC tag</h2>
   <div className="feeding-tag-guide" aria-labelledby="walk-tag-guide-title"><h3 id="walk-tag-guide-title">Three simple steps</h3><ol>
    <li><span><Copy aria-hidden="true"/></span><div><strong>{supported?'Start setup':'Copy the PawShare link'}</strong><small>{supported?'Tap “Set up collar tag” below.':'Use the button below.'}</small></div></li>
    <li><span><Nfc aria-hidden="true"/></span><div><strong>{supported?'Hold the tag to your phone':'Write it with NFC Tools'}</strong><small>{supported?'Keep it still until PawShare confirms.':'Write → Add a record → Custom URL/URI → paste → Write.'}</small></div></li>
